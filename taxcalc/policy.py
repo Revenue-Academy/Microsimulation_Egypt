@@ -41,10 +41,10 @@ class Policy(ParametersBase):
     class instance: Policy
     """
 
-    DEFAULTS_FILENAME = 'current_law_policy_poland.json'
-    JSON_START_YEAR = 2017  # remains the same unless earlier data added
-    LAST_KNOWN_YEAR = 2017  # last year for which indexed param vals are known
-    LAST_BUDGET_YEAR = 2023  # increases by one for every new assessment year
+    DEFAULTS_FILENAME = 'current_law_policy_cit_egypt.json'
+    JSON_START_YEAR = 2020  # remains the same unless earlier data added
+    LAST_KNOWN_YEAR = 2020  # last year for which indexed param vals are known
+    LAST_BUDGET_YEAR = 2024  # increases by one for every new assessment year
     DEFAULT_NUM_YEARS = LAST_BUDGET_YEAR - JSON_START_YEAR + 1
 
     def __init__(self,
@@ -72,7 +72,7 @@ class Policy(ParametersBase):
         syr = start_year
         lyr = start_year + num_years - 1
         self._inflation_rates = self._gfactors.price_inflation_rates(syr, lyr)
-        self._wage_growth_rates = self._gfactors.wage_growth_rates(syr, lyr)
+        #self._wage_growth_rates = self._gfactors.wage_growth_rates(syr, lyr)
 
         self.initialize(start_year, num_years)
 
@@ -221,9 +221,10 @@ class Policy(ParametersBase):
 
     JSON_REFORM_SUFFIXES = {
         # AGEGRP-indexed suffixes and list index numbers
-        '<60': 0,
-        '60-79': 1,
-        '>=80': 2,
+        'Hotels': 0,
+        'Banks': 1,
+        'Oil&Gas': 2,
+        'Gen Business': 3
     }
 
     @staticmethod

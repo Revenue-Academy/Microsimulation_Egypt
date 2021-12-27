@@ -14,13 +14,13 @@ import re
 import copy
 import numpy as np
 import pandas as pd
-from taxcalc.functions import (net_salary_income, taxable_income,
-                               pit_liability)
-from taxcalc.corpfunctions import (is_small_business, corp_income,
-                                   corp_tax_base_before_deductions,
-                                   corp_tax_base_after_deductions,
-                                   cit_liability)
-from taxcalc.gstfunctions import (gst_liability)
+#from taxcalc.functions import (net_salary_income, taxable_income,
+#                               pit_liability)
+from taxcalc.functions_egypt import (Net_accounting_profit, Total_additions_to_GP, Total_taxable_profit,\
+                                    Tax_depreciation, Total_deductions, Net_taxable_profit, Donations_allowed,\
+                                    Carried_forward_losses, Tax_base, Net_tax_base, Net_tax_base_Egyp_Pounds,\
+                                    cit_liability)
+#from taxcalc.gstfunctions import (gst_liability)
 from taxcalc.policy import Policy
 from taxcalc.records import Records
 from taxcalc.corprecords import CorpRecords
@@ -84,8 +84,7 @@ class Calculator(object):
     """
     # pylint: disable=too-many-public-methods
 
-    def __init__(self, policy=None, records=None, corprecords=None,
-                 gstrecords=None, verbose=True, sync_years=True):
+    def __init__(self, policy=None, records=None, verbose=True, sync_years=True):
         # pylint: disable=too-many-arguments,too-many-branches
         if isinstance(policy, Policy):
             self.__policy = copy.deepcopy(policy)
@@ -95,6 +94,7 @@ class Calculator(object):
             self.__records = copy.deepcopy(records)
         else:
             raise ValueError('must specify records as a Records object')
+        '''
         if isinstance(gstrecords, GSTRecords):
             self.__gstrecords = copy.deepcopy(gstrecords)
         else:
@@ -103,6 +103,7 @@ class Calculator(object):
             self.__corprecords = copy.deepcopy(corprecords)
         else:
             raise ValueError('must specify records as a CorpRecords object')
+        '''
         if self.__policy.current_year < self.__records.data_year:
             self.__policy.set_year(self.__records.data_year)
         current_year_is_data_year = (
@@ -124,8 +125,8 @@ class Calculator(object):
                       'extrapolated your data to ' +
                       str(self.__records.current_year) + '.')
         assert self.__policy.current_year == self.__records.current_year
-        assert self.__policy.current_year == self.__gstrecords.current_year
-        assert self.__policy.current_year == self.__corprecords.current_year
+        #assert self.__policy.current_year == self.__gstrecords.current_year
+        #assert self.__policy.current_year == self.__corprecords.current_year
         self.__stored_records = None
 
     def increment_year(self):
@@ -134,8 +135,8 @@ class Calculator(object):
         """
         next_year = self.__policy.current_year + 1
         self.__records.increment_year()
-        self.__gstrecords.increment_year()
-        self.__corprecords.increment_year()
+        #self.__gstrecords.increment_year()
+        #self.__corprecords.increment_year()
         self.__policy.set_year(next_year)
 
     def advance_to_year(self, year):
@@ -159,27 +160,26 @@ class Calculator(object):
         # pylint: disable=too-many-function-args,no-value-for-parameter
         # conducts static analysis of Calculator object for current_year
         assert self.__records.current_year == self.__policy.current_year
-        assert self.__gstrecords.current_year == self.__policy.current_year
-        assert self.__corprecords.current_year == self.__policy.current_year
+        #assert self.__gstrecords.current_year == self.__policy.current_year
+        #assert self.__corprecords.current_year == self.__policy.current_year
         self.__records.zero_out_changing_calculated_vars()
         # For now, don't zero out for corporate
         # pdb.set_trace()
         # Corporate calculations
-        is_small_business(self.__policy, self.__corprecords)        
-        corp_income(self.__policy, self.__corprecords)
-        corp_tax_base_before_deductions(self.__policy, self.__corprecords)
-        corp_tax_base_after_deductions(self.__policy, self.__corprecords)        
-        cit_liability(self.__policy, self.__corprecords)
+        Net_accounting_profit(self.__policy, self.__records)
+        Total_additions_to_GP(self.__policy, self.__records)
+        Total_taxable_profit(self.__policy, self.__records)
+        Tax_depreciation(self.__policy, self.__records)
+        Total_deductions(self.__policy, self.__records)
+        Net_taxable_profit(self.__policy, self.__records)
+        Donations_allowed(self.__policy, self.__records)
+        Carried_forward_losses(self.__policy, self.__records)
+        Tax_base(self.__policy, self.__records)   
+        Net_tax_base(self.__policy, self.__records) 
+        Net_tax_base_Egyp_Pounds(self.__policy, self.__records)    
+        cit_liability(self.__policy, self.__records)
 
-        # Individual calculations
-        net_salary_income(self.__policy, self.__records)
-        taxable_income(self.__policy, self.__records)
-        pit_liability(self.__policy, self.__records)
-        # GST calculations
-        # agg_consumption(self.__policy, self.__gstrecords)
-        # gst_liability_cereal(self.__policy, self.__gstrecords)
-        # gst_liability_other(self.__policy, self.__gstrecords)
-        gst_liability(self.__policy, self.__gstrecords)
+        
         # TODO: ADD: expanded_income(self.__policy, self.__records)
         # TODO: ADD: aftertax_income(self.__policy, self.__records)
 
@@ -484,8 +484,8 @@ class Calculator(object):
             otherwise, return false.  (Note that "same" means nobody's
             GTI differs by more than one cent.)
             """
-            im1 = calc1.array('GTI')
-            im2 = calc2.array('GTI')
+            im1 = calc1.array('Net_taxable_profit')
+            im2 = calc2.array('Net_taxable_profit')
             return np.allclose(im1, im2, rtol=0.0, atol=0.01)
         # main logic of method
         assert calc is None or isinstance(calc, Calculator)
@@ -495,7 +495,7 @@ class Calculator(object):
             assert np.allclose(self.array('weight'),
                                calc.array('weight'))  # rows in same order
         var_dataframe = self.distribution_table_dataframe()
-        imeasure = 'GTI'
+        imeasure = 'Net_taxable_profit'
         dt1 = create_distribution_table(var_dataframe, groupby, imeasure,
                                         averages, scaling)
         del var_dataframe
@@ -506,10 +506,10 @@ class Calculator(object):
             assert calc.array_len == self.array_len
             var_dataframe = calc.distribution_table_dataframe()
             if have_same_income_measure(self, calc):
-                imeasure = 'GTI'
+                imeasure = 'Net_taxable_profit'
             else:
-                imeasure = 'GTI_baseline'
-                var_dataframe[imeasure] = self.array('GTI')
+                imeasure = 'Net_taxable_profit'
+                var_dataframe[imeasure] = self.array('Net_taxable_profit')
             dt2 = create_distribution_table(var_dataframe, groupby, imeasure,
                                             averages, scaling)
             del var_dataframe
@@ -568,16 +568,9 @@ class Calculator(object):
         del calc_var_dataframe
         return diff
 
-    MTR_VALID_VARIABLES = [
-        'SALARIES', 'INCOME_HP', 'PRFT_GAIN_BP_OTHR_SPECLTV_BUS',
-        'PRFT_GAIN_BP_SPECLTV_BUS', 'PRFT_GAIN_BP_SPCFD_BUS',
-        'PRFT_GAIN_BP_INC_115BBF', 'TOTAL_PROFTS_GAINS_BP', 'ST_CG_AMT_1',
-        'ST_CG_AMT_2', 'ST_CG_AMT_APPRATE', 'TOTAL_SCTG', 'LT_CG_AMT_1',
-        'LT_CG_AMT_2', 'TOTAL_LTCG', 'TOTAL_CAP_GAIN',
-        'INCOME_OS_NOT_RACEHORSE', 'INC_CHARBLE_SPL_RATE',
-        'INCOME_OS_RACEHORSE', 'TOTAL_INCOME_OS']
+    MTR_VALID_VARIABLES = ['Total_taxable_profit']
 
-    def mtr(self, variable_str='SALARIES',
+    def mtr(self, variable_str='Total_taxable_profit',
             negative_finite_diff=False,
             zero_out_calculated_vars=False,
             calc_all_already_called=False,
@@ -659,40 +652,40 @@ class Calculator(object):
         self.store_records()
         # extract variable array(s) from embedded records object
         variable = self.array(variable_str)
-        if variable_str == 'SALARIES':
-            earnings_var = self.array('SALARIES')
-        elif variable_str == 'PRFT_GAIN_BP_OTHR_SPECLTV_BUS':
-            seincome_var = self.array('PRFT_GAIN_BP_OTHR_SPECLTV_BUS')
+        if variable_str == 'Total_taxable_profit':
+            earnings_var = self.array('Total_taxable_profit')
+        elif variable_str == 'Total_taxable_profit':
+            seincome_var = self.array('Total_taxable_profit')
         # calculate level of taxes after a marginal increase in income
         self.array(variable_str, variable + finite_diff)
-        if variable_str == 'SALARIES':
-            self.array('SALARIES', earnings_var + finite_diff)
-        elif variable_str == 'SALARIES':
-            self.array('SALARIES', earnings_var + finite_diff)
-        elif variable_str == 'SALARIES':
-            self.array('SALARIES', seincome_var + finite_diff)
+        if variable_str == 'Total_taxable_profit':
+            self.array('Total_taxable_profit', earnings_var + finite_diff)
+        elif variable_str == 'Total_taxable_profit':
+            self.array('Total_taxable_profit', earnings_var + finite_diff)
+        elif variable_str == 'Total_taxable_profit':
+            self.array('Total_taxable_profit', seincome_var + finite_diff)
         self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
-        pitax_chng = self.array('pitax')
+        citax_chng = self.array('citax')
         # calculate base level of taxes after restoring records object
         self.restore_records()
         if not calc_all_already_called or zero_out_calculated_vars:
             self.calc_all(zero_out_calc_vars=zero_out_calculated_vars)
-        pitax_base = self.array('pitax')
+        citax_base = self.array('citax')
         # compute marginal changes in combined tax liability
-        pitax_diff = pitax_chng - pitax_base
+        citax_diff = citax_chng - citax_base
         # compute marginal tax rates
-        mtr_pitax = pitax_diff / finite_diff
+        mtr_citax = citax_diff / finite_diff
         # delete intermediate variables
         del variable
-        if variable_str == 'SALARIES':
+        if variable_str == 'Total_taxable_profit':
             del earnings_var
-        elif variable_str == 'PRFT_GAIN_BP_OTHR_SPECLTV_BUS':
+        elif variable_str == 'Total_taxable_profit':
             del seincome_var
-        del pitax_chng
-        del pitax_base
-        del pitax_diff
+        del citax_chng
+        del citax_base
+        del citax_diff
         # return the marginal tax rate array
-        return mtr_pitax
+        return mtr_citax
 
     REQUIRED_REFORM_KEYS = set(['policy'])
     # THE REQUIRED_ASSUMP_KEYS ARE OBSOLETE BECAUSE NO ASSUMP FILES ARE USED

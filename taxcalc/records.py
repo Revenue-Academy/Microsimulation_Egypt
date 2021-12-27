@@ -75,18 +75,18 @@ class Records(object):
     # suppress pylint warnings about too many class instance attributes:
     # pylint: disable=too-many-instance-attributes
 
-    PITCSV_YEAR = 2017
+    CITCSV_YEAR = 2020
 
     CUR_PATH = os.path.abspath(os.path.dirname(__file__))
-    PIT_DATA_FILENAME = 'pit.csv'
-    PIT_WEIGHTS_FILENAME = 'pit_weights.csv'
-    VAR_INFO_FILENAME = 'records_variables.json'
+    CIT_DATA_FILENAME = 'dataegyptallsectors.csv'
+    CIT_WEIGHTS_FILENAME = 'cit_weights_egypt.csv'
+    VAR_INFO_FILENAME = 'records_variables_egypt.json'
 
     def __init__(self,
-                 data=PIT_DATA_FILENAME,
+                 data=CIT_DATA_FILENAME,
                  gfactors=GrowFactors(),
-                 weights=PIT_WEIGHTS_FILENAME,
-                 start_year=PITCSV_YEAR):
+                 weights=CIT_WEIGHTS_FILENAME,
+                 start_year=CITCSV_YEAR):
         # pylint: disable=too-many-arguments,too-many-locals
         self.__data_year = start_year
         # read specified data
@@ -111,7 +111,7 @@ class Records(object):
         # specify current_year and AYEAR values
         if isinstance(start_year, int):
             self.__current_year = start_year
-            self.AYEAR.fill(start_year)
+            self.Year.fill(start_year)
         else:
             msg = 'start_year is not an integer'
             raise ValueError(msg)
@@ -164,7 +164,7 @@ class Records(object):
         are skipped.
         """
         self.__current_year = new_current_year
-        self.AYEAR.fill(new_current_year)
+        self.Tax_year.fill(new_current_year)
 
     @staticmethod
     def read_var_info():
@@ -215,9 +215,33 @@ class Records(object):
         Apply to READ (not CALC) variables the grow factors for specified year.
         """
         # pylint: disable=too-many-locals,too-many-statements
-        GF_SALARIES = self.gfactors.factor_value('SALARIES', year)
+        GF_Revenues = self.gfactors.factor_value('Revenues', year)
+        GF_Other_revenues = self.gfactors.factor_value('Other_revenues', year)
+        GF_Expenses = self.gfactors.factor_value('Expenses', year)
+        GF_Donations_NGO = self.gfactors.factor_value('Donations_NGO', year)
+        GF_Donations_Others = self.gfactors.factor_value('Donations_Others', year)
+        GF_Donations_Govt = self.gfactors.factor_value('Donations_Govt', year)
+        GF_Other_additions = self.gfactors.factor_value('Other_additions', year)
+        GF_Tax_depreciation = self.gfactors.factor_value('Tax_depreciation', year)
+        GF_Other_deductions = self.gfactors.factor_value('Other_deductions', year)
+        GF_Carried_forward_losses = self.gfactors.factor_value('Carried_forward_losses', year)
+        GF_Exemptions = self.gfactors.factor_value('Exemptions', year)
+        GF_Investment_incentive = self.gfactors.factor_value('Investment_incentive', year)
+        GF_Exchange_rate = self.gfactors.factor_value('Exchange_rate', year)
 
-        self.SALARIES *= GF_SALARIES
+        self.Revenues *= GF_Revenues
+        self.Other_revenues *= GF_Other_revenues
+        self.Expenses *= GF_Expenses
+        self.Donations_NGO *= GF_Donations_NGO
+        self.Donations_Others *= GF_Donations_Others
+        self.Donations_Govt *= GF_Donations_Govt
+        self.Other_additions *= GF_Other_additions
+        self.Tax_depreciation *= GF_Tax_depreciation
+        self.Other_deductions *= GF_Other_deductions
+        self.Carried_forward_losses *= GF_Carried_forward_losses
+        self.Exemptions *= GF_Exemptions
+        self.Investment_incentive *= GF_Investment_incentive
+        self.Exchange_rate *= GF_Exchange_rate
 
 
 
