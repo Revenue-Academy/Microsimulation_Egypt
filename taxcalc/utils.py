@@ -22,25 +22,18 @@ from taxcalc.utilsprvt import (weighted_count_lt_zero,
 # DIST_TABLE_LABELS list below; this correspondence allows us to use this
 # labels list to map a label to the correct column in a distribution table.
 
-DIST_VARIABLES = ['weight', 'GTI', 'TTI',
-                  'TI_special_rates', 'tax_TI_special_rates',
-                  'Aggregate_Income', 'tax_Aggregate_Income',
-                  'tax_TTI', 'rebate', 'surcharge', 'cess', 'pitax']
+DIST_VARIABLES = ['weight', 'Revenues', 'Total_taxable_profit', 'Net_taxable_profit', 'Tax_base', 'Net_tax_base', 'citax']
 
 DIST_TABLE_COLUMNS = DIST_VARIABLES
 
 DIST_TABLE_LABELS = ['Returns',
-                     'GTI',
-                     'TTI All',
-                     'TTI @ Special Rates',
-                     'Tax @ Special Rates',
-                     'TTI @ Normal Rates',
+                     'Sales revenue',
+                     'Total taxable profit',
+                     'Net taxable profit',
+                     'Tax base after deductions',
+                     'Tax base after exemption',
                      'Tax @ Normal Rates',
-                     'Tax on TTI',
-                     'Rebate',
-                     'Surcharge',
-                     'CESS',
-                     'PITax']
+                     'CIT liability']
 
 DECILE_ROW_NAMES = ['0-10n', '0-10z', '0-10p',
                     '10-20', '20-30', '30-40', '40-50',
@@ -48,12 +41,12 @@ DECILE_ROW_NAMES = ['0-10n', '0-10z', '0-10p',
                     'ALL',
                     '90-95', '95-99', 'Top 1%']
 
-STANDARD_ROW_NAMES = ['<0', '=0', '0-5L', '5-10L', '10-15L',
-                      '15-20L', '20-30L', '30-40L', '40-50L',
-                      '50-100L', '>100L', 'ALL']
+STANDARD_ROW_NAMES = ['<0', '=0', '0-1 MN', '1-5 MN', '5-10 MN', '10-15 MN',
+                      '15-20 MN', '20-30 MN', '30-40 MN', '40-50 MN',
+                      '50-100 MN', '>100 MN', 'ALL']
 
-STANDARD_INCOME_BINS = [-9e99, -1e-9, 1e-9, 5e5, 10e5, 15e5, 20e5, 30e5,
-                        40e5, 50e5, 100e5, 9e99]
+STANDARD_INCOME_BINS = [-9e99, -1e-9, 1e-9, 1e6, 5e6, 10e6, 20e6, 30e6,
+                        40e6, 50e6, 100e6, 9e99]
 
 
 def unweighted_sum(pdf, col_name):
@@ -231,8 +224,8 @@ def create_distribution_table(vdf, groupby, income_measure,
     assert isinstance(vdf, pd.DataFrame)
     assert (groupby == 'weighted_deciles' or
             groupby == 'standard_income_bins')
-    assert (income_measure == 'GTI' or
-            income_measure == 'GTI_baseline')
+    assert (income_measure == 'Net_taxable_profit' or
+            income_measure == 'Net_taxable_profit')
     assert income_measure in vdf
     assert 'table_row' not in list(vdf.columns.values)
     # sort the data given specified groupby and income_measure

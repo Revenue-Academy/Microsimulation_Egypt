@@ -78,20 +78,20 @@ class CorpRecords(object):
     # suppress pylint warnings about too many class instance attributes:
     # pylint: disable=too-many-instance-attributes
 
-    CITCSV_YEAR = 2017
+    CITCSV_YEAR = 2019
 
     CUR_PATH = os.path.abspath(os.path.dirname(__file__))
-    CIT_DATA_FILENAME = 'cit_poland.csv'
-    CIT_WEIGHTS_FILENAME = 'cit_weights_poland.csv'
-    CIT_BLOWFACTORS_FILENAME = 'cit_panel_blowup.csv'
-    VAR_INFO_FILENAME = 'corprecords_variables_poland.json'
+    CIT_DATA_FILENAME = 'citdataegypt.csv'
+    CIT_WEIGHTS_FILENAME = 'cit_weights_egypts.csv'
+    #CIT_BLOWFACTORS_FILENAME = 'growfactors_egypt.csv'
+    VAR_INFO_FILENAME = 'records_variables_egypt.json'
 
     def __init__(self,
                  data=CIT_DATA_FILENAME,
                  data_type='cross-section',
                  gfactors=GrowFactors(),
                  weights=CIT_WEIGHTS_FILENAME,
-                 panel_blowup=CIT_BLOWFACTORS_FILENAME,
+                 panel_blowup=None,
                  start_year=CITCSV_YEAR):
         # pylint: disable=too-many-arguments,too-many-locals
         self.__data_year = start_year
