@@ -43,8 +43,8 @@ class Application(Frame):
         self.selected_value = ""
         self.selected_year = 2020
         self.sub_directory = "taxcalc"
-        self.data_filename = "dataegyptallsectors.csv"
-        self.weights_filename = "cit_weights_egypt.csv"
+        self.data_filename = "smalldataegyptallsectors.csv"
+        self.weights_filename = "smallcit_weights_egypt.csv"
         self.policy_filename = "current_law_policy_cit_egypt.json"
         self.records_vars_filename = "records_variables_egypt.json"
         self.growfactors_filename = self.sub_directory+"/"+"growfactors_egypt.csv"    
@@ -402,19 +402,59 @@ class Application(Frame):
         button_close1 = ttk.Button(window, text="Close", style='my.TButton', command=window.destroy)
         button_close1.place(relx = 0.50, rely = 0.90)
         
-        ''' Dump_vars is a list of dump variables which is all the read and calculated variables generated using the function
-            read_calc_variables '''
+        ''' Dump_vars is a list of dump variables which is all the read and calculated variables generated using the function read_calc_variables '''
 
         dump_vars = self.read_calc_variables()
         #dump_vars = ['Taxpayer_ID', 'Revenues', 'Tax_base', 'citax']
-        
-        
+               
         y_add_space = 0.07
         df=pd.DataFrame()
-        i=0
-        for year in range(2020, 2025):
+
+        '''Start calculations with start year of data '''
+
+        calc1.calc_all(2020)
+        weighted_citax1 = calc1.weighted_total('citax')
+        citax_collection1 = weighted_citax1.sum()
+        citax_collection_billions1 = citax_collection1/10**9
+        citax_collection_str1 = '{0:.2f}'.format(citax_collection_billions1)
+        print('\n\n\n')
+        print('TAX COLLECTION FOR THE YEAR: ', 2020)
+        print("The CIT Collection in billions is: ", citax_collection_str1)
+        dumpdf = calc1.dataframe(dump_vars)
+        dumpdf.to_csv('egypt_results_'+ str(2020) + '.csv', index=False, float_format='%.0f')
+        df['citax'+str(2020)] = dumpdf.groupby(dumpdf['Sector'])[['citax']].sum()
+        total_revenue_text = "TAX COLLECTION FOR THE YEAR - " + str(2020) + " is: " + str(citax_collection_str1) + " bn EGP"
+        revenue_label = Label(window, text=total_revenue_text, font=self.fontStyle)
+        revenue_label.place(relx = 0.05, rely = 0.20, anchor = "w")  
+
+        '''Read the calculated new loss data from the dataframe into bfloss variables '''
+        '''This will allow this data to replace the loss_lag var data with new loss data '''
+
+        bfloss1=dumpdf.newloss1
+        bfloss2=dumpdf.newloss2
+        bfloss3=dumpdf.newloss3
+        bfloss4=dumpdf.newloss4
+        bfloss5=dumpdf.newloss5
+        bfloss6=dumpdf.newloss6
+        bfloss7=dumpdf.newloss7
+        bfloss8=dumpdf.newloss8
+        bfloss=[bfloss1,bfloss2,bfloss3,bfloss4, bfloss5, bfloss6, bfloss7, bfloss8]
+        #losslag=['Loss_lag1', 'Loss_lag2', 'Loss_lag3', 'Loss_lag4', 'Loss_lag5', 'Loss_lag6', 'Loss_lag7', 'Loss_lag8']
+
+        i=1
+        for year in range(2021, 2025):
             calc1.advance_to_year(year)    
         # Produce DataFrame of results using cross-section
+        # Update the loss lag data in the current year (which loops from 2021 to 2024) with bf loss data 
+
+            calc1.array('Loss_lag1', np.array(bfloss1))
+            calc1.array('Loss_lag2', np.array(bfloss2))
+            calc1.array('Loss_lag3', np.array(bfloss3))
+            calc1.array('Loss_lag4', np.array(bfloss4))
+            calc1.array('Loss_lag5', np.array(bfloss5))
+            calc1.array('Loss_lag6', np.array(bfloss6))
+            calc1.array('Loss_lag7', np.array(bfloss7))
+            calc1.array('Loss_lag8', np.array(bfloss8))
             calc1.calc_all()
             weighted_citax1 = calc1.weighted_total('citax')
             citax_collection1 = weighted_citax1.sum()
@@ -426,10 +466,21 @@ class Application(Frame):
             dumpdf = calc1.dataframe(dump_vars)
             dumpdf.to_csv('egypt_results_'+ str(year) + '.csv', index=False, float_format='%.0f')
             df['citax'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['citax']].sum()
+        
+        # Read the new loss data before the next loop begins to update the loss lag vars
+            bfloss1=dumpdf.newloss1
+            bfloss2=dumpdf.newloss2
+            bfloss3=dumpdf.newloss3
+            bfloss4=dumpdf.newloss4
+            bfloss5=dumpdf.newloss5
+            bfloss6=dumpdf.newloss6
+            bfloss7=dumpdf.newloss7
+            bfloss8=dumpdf.newloss8
+            
             total_revenue_text = "TAX COLLECTION FOR THE YEAR - " + str(year) + " is: " + str(citax_collection_str1) + " bn EGP"
             revenue_label = Label(window, text=total_revenue_text, font=self.fontStyle)
             revenue_label.place(relx = 0.05, rely = 0.20 + y_add_space*i, anchor = "w")        
-            i +=1
+            i += 1
         
         df = df/10**6
         df = df.rename(index={0.0:"Hotels", 1.0:"Banks", 2.0:"Oil&Gas", 3.0:"Gen Bus"})
@@ -470,10 +521,12 @@ class Application(Frame):
         
         for num in range(1, self.num_reforms):
             self.block_selected_dict[num]['selected_item']= self.block_widget_dict[num][1].get()
-            self.block_selected_dict[num]['selected_value']= self.block_widget_dict[num][3].get()
             self.block_selected_dict[num]['selected_year']= self.block_widget_dict[num][2].get()
+            self.block_selected_dict[num]['selected_value']= self.block_widget_dict[num][3].get()
+            if self.block_selected_dict[num]['selected_item'] == 'Loss_CFLimit':
+                self.block_selected_dict[num]['selected_value'] = int(self.block_selected_dict[num]['selected_value'])
         
-        #print(self.block_selected_dict)
+        print(self.block_selected_dict)
         
         recs = Records(data=self.data_filename, weights=self.weights_filename)
         
@@ -487,6 +540,7 @@ class Application(Frame):
         # create Policy object containing current-law policy
         pol = Policy(DEFAULTS_FILENAME=self.policy_filename)
         
+        ''' CURRENT LAW POLICY CALCULATOR '''
         # specify Calculator objects for current-law policy
         calc1 = Calculator(policy=pol, records=recs, verbose=False)
         assert isinstance(calc1, Calculator)
@@ -498,13 +552,15 @@ class Application(Frame):
         
         years, self.reform=self.read_reform_dict(self.block_selected_dict)
         print("reform dictionary: ",self.reform) 
+        
+        ''' CALCULATOR FOR REFORM '''
         #reform = Calculator.read_json_param_objects('app01_reform.json', None)
         pol2.implement_reform(self.reform['policy'])
         
         calc2 = Calculator(policy=pol2, records=recs, verbose=False)
         # popup window for the Results
         window = tk.Toplevel()
-        window.geometry("600x500+140+140")
+        window.geometry("600x700+140+140")
         label = tk.Label(window, text="Results", font=self.fontStyle)
         label.place(relx = 0.05, rely = 0.14)
         self.s = ttk.Style()
@@ -512,38 +568,110 @@ class Application(Frame):
         button_close = ttk.Button(window, text="Close", style='my.TButton', command=window.destroy)
         button_close.place(relx = 0.50, rely = 0.90)
         
-
+        '''CREATE EMPTY DICTIONARIES TO RECORD THE TOTAL CIT COLLECTION UNDER CURRENT LAW AND REFORM POLICY FOR VARIOUS YEARS '''
         
         total_revenue_text={}
         reform_revenue_text={}
         revenue_dict={}
         revenue_amount_dict = {}
         num = 1
-        #for year in range(years[0], years[-1]+1):            
-        for year in range(2020, 2024):  
-            calc1.advance_to_year(year)        
-            calc2.advance_to_year(year)
+
+        '''RUN THE CURRENT LAW POLICY CALCULATOR '''
+        calc1.calc_all(2020)
+        weighted_citax = calc1.weighted_total('citax')
+        citax_collection = weighted_citax.sum()
+        citax_collection_billions = citax_collection/10**9
+        citax_collection_str = '{0:.2f}'.format(citax_collection_billions)
+        print('\n\n\n')
+        print('TAX COLLECTION FOR THE YEAR: ', 2020)
+        print("The CIT Collection in billions is: ", citax_collection_str)
+        newlossvars =['newloss1', 'newloss2', 'newloss3', 'newloss4', 'newloss5', 'newloss6', 'newloss7', 'newloss8']
+        dumpdf = calc1.dataframe(newlossvars)
+        
+        #total_revenue_text = "TAX COLLECTION FOR THE YEAR 2020 is: " + str(citax_collection_str) + " bn EGP"
+        #revenue_label = Label(window, text=total_revenue_text, font=self.fontStyle)
+        #revenue_label.place(relx = 0.05, rely = 0.20, anchor = "w")  
+
+        bfloss1=dumpdf.newloss1
+        bfloss2=dumpdf.newloss2
+        bfloss3=dumpdf.newloss3
+        bfloss4=dumpdf.newloss4
+        bfloss5=dumpdf.newloss5
+        bfloss6=dumpdf.newloss6
+        bfloss7=dumpdf.newloss7
+        bfloss8=dumpdf.newloss8
+        bfloss=[bfloss1,bfloss2,bfloss3,bfloss4, bfloss5, bfloss6, bfloss7, bfloss8]
+
+               
+        for year in range(2021, 2025):  
+            calc1.advance_to_year(year) 
+            
             # NOTE: calc1 now contains a PRIVATE COPY of pol and a PRIVATE COPY of recs,
             #       so we can continue to use pol and recs in this script without any
             #       concern about side effects from Calculator method calls on calc1.
     
             # Produce DataFrame of results using cross-section
+            calc1.array('Loss_lag1', np.array(bfloss1))
+            calc1.array('Loss_lag2', np.array(bfloss2))
+            calc1.array('Loss_lag3', np.array(bfloss3))
+            calc1.array('Loss_lag4', np.array(bfloss4))
+            calc1.array('Loss_lag5', np.array(bfloss5))
+            calc1.array('Loss_lag6', np.array(bfloss6))
+            calc1.array('Loss_lag7', np.array(bfloss7))
+            calc1.array('Loss_lag8', np.array(bfloss8))
+
             calc1.calc_all()
             weighted_citax1 = calc1.weighted_total('citax')
                     
             citax_collection_billions1 = weighted_citax1/10**9
             
             citax_collection_str1 = '{0:.2f}'.format(citax_collection_billions1)
-            
+            newlossvars =['newloss1', 'newloss2', 'newloss3', 'newloss4', 'newloss5', 'newloss6', 'newloss7', 'newloss8']
+            dumpdf1 = calc1.dataframe(newlossvars)
+            bfloss1=dumpdf1.newloss1
+            bfloss2=dumpdf1.newloss2
+            bfloss3=dumpdf1.newloss3
+            bfloss4=dumpdf1.newloss4
+            bfloss5=dumpdf1.newloss5
+            bfloss6=dumpdf1.newloss6
+            bfloss7=dumpdf1.newloss7
+            bfloss8=dumpdf1.newloss8
             print('\n\n\n')
-            print('TAX COLLECTION FOR THE YEAR - 2020\n')
+                        
+            print("The CIT Collection in billions for " + str(year) + "is: ", citax_collection_str1)
             
-            print("The CIT Collection in billions is: ", citax_collection_str1)
+            total_revenue_text[year] = "TAX COLLECTION UNDER CURRENT LAW FOR THE YEAR - " + str(year) + " : " + str(citax_collection_str1) + " bn EGP"
+            revenue_dict[year]={}
+            revenue_amount_dict[year]={}
+            revenue_dict[year]['current_law']={}
+            revenue_amount_dict[year]['current_law']={}
+            revenue_dict[year]['current_law']['Label'] = Label(window, text=total_revenue_text[year], font=self.fontStyle)
+            revenue_dict[year]['current_law']['Label'].place(relx = 0.05, rely = 0.1+(num-1)*0.1, anchor = "w")
+            revenue_amount_dict[year]['current_law']['amount'] = citax_collection_str1
+            num += 1
+
+
+        bfloss1=dumpdf.newloss1
+        bfloss2=dumpdf.newloss2
+        bfloss3=dumpdf.newloss3
+        bfloss4=dumpdf.newloss4
+        bfloss5=dumpdf.newloss5
+        bfloss6=dumpdf.newloss6
+        bfloss7=dumpdf.newloss7
+        bfloss8=dumpdf.newloss8
+        
+        for year in range(2021, 2025):  
+            calc2.advance_to_year(year) 
             
-            total_revenue_text[year] = "TAX COLLECTION UNDER CURRENT LAW FOR THE YEAR - " + str(year)+" : "+str(citax_collection_str1)+" bn EGP"
-            #self.l6.config(text=total_revenue_text1)
-            #self.l6.place(relx = 0.1, rely = 0.7+(num-1)*0.1, anchor = "w")
-            # Produce DataFrame of results using cross-section
+            calc2.array('Loss_lag1', np.array(bfloss1))
+            calc2.array('Loss_lag2', np.array(bfloss2))
+            calc2.array('Loss_lag3', np.array(bfloss3))
+            calc2.array('Loss_lag4', np.array(bfloss4))
+            calc2.array('Loss_lag5', np.array(bfloss5))
+            calc2.array('Loss_lag6', np.array(bfloss6))
+            calc2.array('Loss_lag7', np.array(bfloss7))
+            calc2.array('Loss_lag8', np.array(bfloss8))
+            
             calc2.calc_all()
             
             weighted_citax2 = calc2.weighted_total('citax')
@@ -552,34 +680,32 @@ class Application(Frame):
             
             citax_collection_str2 = '{0:.2f}'.format(citax_collection_billions2)
             
+            newlossvars =['newloss1', 'newloss2', 'newloss3', 'newloss4', 'newloss5', 'newloss6', 'newloss7', 'newloss8']
+            dumpdf2 = calc2.dataframe(newlossvars)
+            bfloss1=dumpdf2.newloss1
+            bfloss2=dumpdf2.newloss2
+            bfloss3=dumpdf2.newloss3
+            bfloss4=dumpdf2.newloss4
+            bfloss5=dumpdf2.newloss5
+            bfloss6=dumpdf2.newloss6
+            bfloss7=dumpdf2.newloss7
+            bfloss8=dumpdf2.newloss8
             print('\n\n\n')
-            print('TAX COLLECTION FOR THE YEAR UNDER REFORM - 2020\n')
+            dumpdf2.to_csv('lossfinal.csv')
+            print("The CIT Collection in billions for " + str(year) + "is : ", citax_collection_str2)
             
-            print("The CIT Collection in billions is: ", citax_collection_str2)
-            
-            reform_revenue_text[year] = "TAX COLLECTION UNDER REFORM FOR THE YEAR - " + str(year)+"           : "+str(citax_collection_str2)+" bn "
+            reform_revenue_text[year] = "TAX COLLECTION UNDER REFORM FOR THE YEAR - " + str(year)+"           : "+str(citax_collection_str2)+" bn EGP "
            
             #df1, df2 = calc1.distribution_tables(calc2, 'weighted_deciles')
             #print(df1, df2)     
-
-            revenue_dict[year]={}
-            revenue_amount_dict[year]={}
-            revenue_dict[year]['current_law']={}
-            revenue_amount_dict[year]['current_law']={}
-            revenue_dict[year]['current_law']['Label'] = Label(window, text=total_revenue_text[year], font=self.fontStyle)
-            revenue_dict[year]['current_law']['Label'].place(relx = 0.05, rely = 0.1+(num-1)*0.15, anchor = "w")
-            revenue_amount_dict[year]['current_law']['amount'] = citax_collection_str1
-            #self.l6=Label(text=self.total_revenue_text1)
-            #self.l6.place(relx = 0.4, rely = 0.1, anchor = "w")
             revenue_dict[year]['reform']={}
             revenue_amount_dict[year]['reform']={}         
             revenue_dict[year]['reform']['Label'] = Label(window, text=reform_revenue_text[year], font=self.fontStyle)
-            revenue_dict[year]['reform']['Label'].place(relx = 0.05, rely = 0.15+(num-1)*0.15, anchor = "w")            
+            revenue_dict[year]['reform']['Label'].place(relx = 0.05, rely = 0.15+(num-1)*0.1, anchor = "w")            
             revenue_amount_dict[year]['reform']['amount'] = citax_collection_str2
-            #self.l7=Label(text=self.reform_revenue_text1)
-            #self.l7.place(relx = 0.4, rely = 0.15, anchor = "w")        
+                    
             num += 1
-        
+
         #print(revenue_amount_dict)
         df_revenue_proj = pd.DataFrame(revenue_amount_dict)
         df_revenue_proj = df_revenue_proj.T
@@ -602,6 +728,9 @@ class Application(Frame):
         img3 = ImageTk.PhotoImage(img2)
         self.pic.configure(image=img3)
         self.pic.image = img3
+
+        
+
 
         #df1, df2 = calc1.distribution_tables(calc2, 'weighted_deciles')
         #print(df1, df2)
