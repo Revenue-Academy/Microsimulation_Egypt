@@ -71,19 +71,53 @@ def Donations_allowed(Donations_NGO, Donations_Others, Donations_NGO_rate, Net_t
 
 @iterate_jit(nopython=True)
 def Carried_forward_losses(Carried_forward_losses, CF_losses):
+
     """
     Compute net taxable profits afer allowing deductions.
     """
     CF_losses = Carried_forward_losses
     return CF_losses
 
+
 @iterate_jit(nopython=True)
-def Tax_base(Net_taxable_profit, Donations_allowed, CF_losses, Tax_base):
+def Tax_base_CF_losses(Net_taxable_profit, Donations_allowed, Loss_CFLimit, 
+    Loss_lag1, Loss_lag2, Loss_lag3, Loss_lag4, Loss_lag5, Loss_lag6, Loss_lag7, Loss_lag8,
+    newloss1, newloss2, newloss3, newloss4, newloss5, newloss6, newloss7, newloss8, Tax_base):
+    
     """
     Compute net tax base afer allowing donations and losses.
     """
-    Tax_base = Net_taxable_profit - Donations_allowed - CF_losses
-    return Tax_base
+    BF_loss = np.array([Loss_lag1, Loss_lag2, Loss_lag3, Loss_lag4, 
+    Loss_lag5, Loss_lag6, Loss_lag7, Loss_lag8])
+    print(BF_loss)
+    N = int(Loss_CFLimit)
+    BF_loss = BF_loss[:N]
+    Gross_Tax_base = min(Net_taxable_profit, max((Net_taxable_profit - Donations_allowed), 0))
+    
+    if Gross_Tax_base < 0:
+        CYL = abs(Gross_Tax_base)
+        Used_loss = np.zeros(N)
+        
+    else:
+        CYL = 0
+        Cum_used_loss = 0
+        Used_loss = np.zeros(N)
+        for i in range(N, 0, -1):
+            GTI = Gross_Tax_base - Cum_used_loss
+            Used_loss[i-1] = min(BF_loss[i-1], GTI)
+            Cum_used_loss += Used_loss[i-1]
+    
+    New_loss = BF_loss - Used_loss
+        
+    Tax_base = Gross_Tax_base - Used_loss.sum()
+
+    newloss1 = CYL
+
+    (newloss2, newloss3, newloss4, 
+    newloss5, newloss6, newloss7, newloss8) = np.append(New_loss[:-1], np.zeros(8-N))
+
+    return (Tax_base, newloss1, newloss2, newloss3, newloss4, newloss5, newloss6, newloss7, newloss8)
+
 
 @iterate_jit(nopython=True)
 def Net_tax_base(Tax_base, cit_rate_oil, Sector, Exemptions, Investment_incentive, Net_tax_base):

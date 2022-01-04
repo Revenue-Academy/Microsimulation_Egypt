@@ -18,7 +18,7 @@ import pandas as pd
 #                               pit_liability)
 from taxcalc.functions_egypt import (Net_accounting_profit, Total_additions_to_GP, Total_taxable_profit,\
                                     Tax_depreciation, Total_deductions, Net_taxable_profit, Donations_allowed,\
-                                    Carried_forward_losses, Tax_base, Net_tax_base, Net_tax_base_Egyp_Pounds,\
+                                    Carried_forward_losses, Tax_base_CF_losses, Net_tax_base, Net_tax_base_Egyp_Pounds,\
                                     cit_liability)
 #from taxcalc.gstfunctions import (gst_liability)
 from taxcalc.policy import Policy
@@ -174,7 +174,7 @@ class Calculator(object):
         Net_taxable_profit(self.__policy, self.__records)
         Donations_allowed(self.__policy, self.__records)
         Carried_forward_losses(self.__policy, self.__records)
-        Tax_base(self.__policy, self.__records)   
+        Tax_base_CF_losses(self.__policy, self.__records)   
         Net_tax_base(self.__policy, self.__records) 
         Net_tax_base_Egyp_Pounds(self.__policy, self.__records)    
         cit_liability(self.__policy, self.__records)

@@ -88,6 +88,46 @@
       "type": "float",
       "desc": "Exchange rate used to convert foreign currency to Egyptian Pounds",
       "form": {"2020": "After Item 317 - Tax Return Legal Persons"}
+    },
+    "Loss_lag1": {
+      "type": "float",
+      "desc": "Brought forward loss - one years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Loss_lag2": {
+      "type": "float",
+      "desc": "Brought forward loss - two years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Loss_lag3": {
+      "type": "float",
+      "desc": "Brought forward loss - three years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Loss_lag4": {
+      "type": "float",
+      "desc": "Brought forward loss - four years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Loss_lag5": {
+      "type": "float",
+      "desc": "Brought forward loss - five years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Loss_lag6": {
+      "type": "float",
+      "desc": "Brought forward loss - six years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Loss_lag7": {
+      "type": "float",
+      "desc": "Brought forward loss - seven years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Loss_lag8": {
+      "type": "float",
+      "desc": "Brought forward loss - eight years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
     }
   
   },
@@ -151,6 +191,48 @@
       "type": "float",
       "desc": "tax due on net tax base",
       "form": {"2020": "010 - Tax Return Legal Persons"}
+    },
+    "newloss1": {
+      "type": "float",
+      "desc": "Carried forward loss - one years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "newloss2": {
+      "type": "float",
+      "desc": "Carried forward loss - two years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "newloss3": {
+      "type": "float",
+      "desc": "Carried forward loss - three years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "newloss4": {
+      "type": "float",
+      "desc": "Carried forward loss - four years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "newloss5": {
+      "type": "float",
+      "desc": "Carried forward loss - five years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "newloss6": {
+      "type": "float",
+      "desc": "Carried forward loss - six years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "newloss7": {
+      "type": "float",
+      "desc": "Carried forward loss - seven years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "newloss8": {
+      "type": "float",
+      "desc": "Carried forward loss - eight years old",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
     }
+    
   }
+  
 }
