@@ -43,7 +43,7 @@ class Application(Frame):
         self.selected_value = ""
         self.selected_year = 2020
         self.sub_directory = "taxcalc"
-        self.data_filename = "smalldataegyptallsectors.csv"
+        self.data_filename = "smalldataegyptallsectorswithlossdep.csv"
         self.weights_filename = "smallcit_weights_egypt.csv"
         self.policy_filename = "current_law_policy_cit_egypt.json"
         self.records_vars_filename = "records_variables_egypt.json"
@@ -51,7 +51,7 @@ class Application(Frame):
         self.benchmark_filename = "tax_incentives_benchmark.json"        
         self.total_revenue_text1 = ""
         self.reform_revenue_text1 = ""
-        self.reform_filename = "egypt_reform.json"
+        #self.reform_filename = "egypt_reform.json"
 
         self.fontStyle = tkfont.Font(family="Helvetica", size="10")
         self.fontStyle_sub_title = tkfont.Font(family="Helvetica", size="14", weight="bold")         
@@ -59,7 +59,7 @@ class Application(Frame):
         self.s = ttk.Style()
         self.s.configure('my.TButton', font=self.fontStyle)        
         self.text_font = ('Arial', '10')
-                
+        self.insert_image('egypt_flag.jpg')      
         # positions
         
         self.title_pos_x = 0.5
@@ -105,6 +105,7 @@ class Application(Frame):
         self.button_add_reform_x = self.block_2_entry_1_3_x + self.block_2_entry_entry_gap_x + 0.03
         self.button_del_reform_x = self.block_2_entry_1_3_x + self.block_2_entry_entry_gap_x + 0.05
         self.button_clear_reform_x = self.block_2_entry_1_3_x + self.block_2_entry_entry_gap_x + 0.07
+        self.button_update_reform_param_x = self.block_2_entry_1_3_x + self.block_2_entry_entry_gap_x + 0.11
            
         
         '''Creating a Label for Tax Microsimulation Model'''
@@ -156,15 +157,7 @@ class Application(Frame):
         self.button_policy_filename = ttk.Button(text = "Change Policy File", style='my.TButton', command=self.input_policy_filename)
         self.button_policy_filename.place(relx = self.block_1_entry_x, 
                                      rely = self.block_1_entry_3_y, anchor = "w")
-        """
-        self.entry_growfactors_filename = Entry(width=30, font = self.fontStyle)
-        self.entry_growfactors_filename.place(relx = self.block_1_entry_x, 
-                                    rely = self.block_1_entry_4_y, anchor = "e")
-        self.entry_growfactors_filename.insert(END, self.policy_filename)
-        self.button_growfactors_filename = ttk.Button(text = "Change Growfactors File", style='my.TButton', command=self.input_growfactors_filename)
-        self.button_growfactors_filename.place(relx = self.block_1_entry_x, 
-                                     rely = self.block_1_entry_4_y, anchor = "w")
-        """        
+          
         
         '''Create Label for Current Law '''
         
@@ -202,7 +195,7 @@ class Application(Frame):
         self.block_widget_dict[1] = {}
         self.block_selected_dict[1] = {}
         self.block_widget_dict[1][1] = ttk.Combobox(value=self.policy_options_list, font=self.text_font, name=str(self.num_reforms))
-        self.block_widget_dict[1][1].current(1)
+        #self.block_widget_dict[1][1].current(0)
         self.block_widget_dict[1][1].place(relx = self.block_2_entry_1_1_x, 
                         rely = self.block_2_entry_1_1_y, anchor = "w", width=300)
         
@@ -226,25 +219,25 @@ class Application(Frame):
         
         '''Create a Button for adding Policy Params to reform '''
 
-        self.num_reforms += 1
+        #self.num_reforms += 1
         self.button_add_reform = ttk.Button(text="+", style='my.TButton', command=self.create_policy_widgets, width=2)
         self.button_add_reform.place(relx = self.button_add_reform_x, rely = self.block_2_entry_1_1_y, anchor = "w") 
 
         '''Create a Button for deleting a reform '''
 
-        self.button_delete_reform = ttk.Button(text="del", style='my.TButton', command=self.delete_policy_widgets, width=2)
+        self.button_delete_reform = ttk.Button(text="-", style='my.TButton', command=self.delete_policy_widgets, width=2)
         self.button_delete_reform.place(relx = self.button_del_reform_x, rely = self.block_2_entry_1_1_y, anchor = "w") 
 
         '''Create a Button to Reset policy reform selection'''
 
         self.button_clear_reform = ttk.Button(text="Reset", style='my.TButton', command=self.reset_policy_widgets, width=6)
         self.button_clear_reform.place(relx = self.button_clear_reform_x, rely = self.block_2_entry_1_1_y, anchor = "w")
-
+        #self.button_clear_reform.bind('<Button-7>', self.reset_policy_widgets)
         
         '''Create a Button for Generating Revenue under Reform using command function 'apply_policy_change'''
 
         self.button_generate_revenue_policy = ttk.Button(text = "Generate Revenue under Reform", style='my.TButton', command=self.apply_policy_change)
-        self.button_2_pos_y = (self.block_2_entry_1_1_y+(self.num_reforms-1)*(self.entry_entry_gap_y)) +self.entry_button_gap
+        self.button_2_pos_y = (self.block_2_entry_1_1_y+(self.num_reforms)*(self.entry_entry_gap_y+0.05)) +self.entry_button_gap
         self.button_generate_revenue_policy.place(relx = self.button_1_pos_x,
                                                     rely = self.button_2_pos_y, anchor = "w")
 
@@ -274,19 +267,7 @@ class Application(Frame):
         self.button_generate_tax_expenditures.place(relx = self.button_3_pos_x, 
                                                  rely = self.button_3_pos_y, anchor = "w")        
         
-        '''Insert a Logo in Frame'''
-
-        #self.image=Image.open("Egypt_logo.png")
-        #self.image=Image.open("WB_logo2.jpg")
-        self.image=Image.open('egypt_flag.jpg')
-        basewidth = 400
-        wpercent = (basewidth/float(self.image.size[0]))
-        hsize = int((float(self.image.size[1])*float(wpercent)))
-        self.image_resized = self.image.resize((basewidth,hsize), Image.ANTIALIAS)
-        self.img = ImageTk.PhotoImage(self.image_resized)
-        self.pic = Label(image=self.img)
-        self.pic.place(relx = 0.65, rely = 0.2, anchor = "nw")
-                
+           
         '''
         ---------------------------------------------------------------------------------------------------------------------------------------------------------
         END OF MAIN CLASS INIT METHOD OF CLASS APPLICATION
@@ -302,8 +283,19 @@ class Application(Frame):
     '''IT FILLS THE NEW POLICY REFORM VALUES WITH DEFAULT VALUES USING 'show_policy_selection' function'''
     '''THEN IT ALLOWS USER TO FILL NEW VALUES OF YEAR AND VALUE OF REFORM PARAM IN THE INPUT FIELDS'''
 
+    def insert_image(self, pic_file):
+        #self.image=Image.open('egypt_flag.jpg')
+        self.image=Image.open(pic_file)
+        basewidth = 400
+        wpercent = (basewidth/float(self.image.size[0]))
+        hsize = int((float(self.image.size[1])*float(wpercent)))
+        self.image_resized = self.image.resize((basewidth,hsize), Image.ANTIALIAS)
+        self.img = ImageTk.PhotoImage(self.image_resized)
+        self.pic = Label(image=self.img)
+        self.pic.place(relx = 0.65, rely = 0.2, anchor = "nw")
+
     def create_policy_widgets(self):
-   
+        self.num_reforms += 1
         self.block_widget_dict[self.num_reforms] = {}
         self.block_selected_dict[self.num_reforms] = {}
         self.block_widget_dict[self.num_reforms][1] = ttk.Combobox(value=self.policy_options_list, font=self.text_font, name=str(self.num_reforms))
@@ -323,9 +315,7 @@ class Application(Frame):
                                                           rely = (self.block_2_entry_1_1_y+
                                 (self.num_reforms-1)*(self.entry_entry_gap_y)), anchor = "w")
         
-               
-        self.num_reforms += 1
-        self.button_2_pos_y = (self.block_2_entry_1_1_y+(self.num_reforms-1)*(self.entry_entry_gap_y))+self.entry_button_gap        
+        self.button_2_pos_y = (self.block_2_entry_1_1_y+(self.num_reforms)*(self.entry_entry_gap_y))+self.entry_button_gap        
         self.button_generate_revenue_policy.place(relx = self.button_1_pos_x,
                                             rely = self.button_2_pos_y, anchor = "w")
 
@@ -335,35 +325,50 @@ class Application(Frame):
     '''SELF.NUM_REFORMS IS SET TO DEFAULT VALUE OF 1 '''
 
     def reset_policy_widgets(self):
-        for num in range(2, self.num_reforms):
+        for num in range(2, self.num_reforms+1):
             self.block_widget_dict[num][1].destroy()
             self.block_widget_dict[num][2].destroy()
             self.block_widget_dict[num][3].destroy()
         self.num_reforms=1
+        self.block_widget_dict[1][3].delete(0, END)
+        self.block_widget_dict[1][2].delete(0, END)
         self.button_2_pos_y = (self.block_2_entry_1_1_y+(self.num_reforms)*(self.entry_entry_gap_y))+self.entry_button_gap 
         self.button_generate_revenue_policy.place(relx = self.button_1_pos_x, rely = self.button_2_pos_y, anchor = "w")
-    
-    
+                
+
     def delete_policy_widgets(self):
-        num = self.num_reforms - 1
+        num = self.num_reforms 
         print(num)
-        if num == 1:
+        if num < 2:
             showinfo("Warning", "cannot delete")
+            self.num_reforms += 1                   # increase num_reforms by 1 so that it doesnt reduce to zero in the next step when it is reduced by 1
         else:
             self.block_widget_dict[num][1].destroy()
             self.block_widget_dict[num][2].destroy()
             self.block_widget_dict[num][3].destroy()
-                
-
+        self.num_reforms -= 1    
+        self.button_2_pos_y = (self.block_2_entry_1_1_y+(self.num_reforms)*(self.entry_entry_gap_y))+self.entry_button_gap 
+        self.button_generate_revenue_policy.place(relx = self.button_1_pos_x, rely = self.button_2_pos_y, anchor = "w")
     
-    def popup_window(self):
+
+
+    def popup_results_window(self, pic_file):
         window = tk.Toplevel()
-
-        label = tk.Label(window, text="Hello World!")
-        label.pack(fill='x', padx=50, pady=5)
-
-        button_close = tk.Button(window, text="Close", style='my.TButton', command=window.destroy)
-        button_close.pack(fill='x')
+        window.geometry("600x500+140+140")
+        self.image=Image.open(pic_file)
+        basewidth = 400
+        wpercent = (basewidth/float(self.image.size[0]))
+        hsize = int((float(self.image.size[1])*float(wpercent)))
+        self.image_resized = self.image.resize((basewidth,hsize), Image.ANTIALIAS)
+        self.img = ImageTk.PhotoImage(self.image_resized)
+        self.pic = tk.Label(window, image=self.img)
+        #label = tk.Label(window, text=results)
+        self.pic.place(relx = 0.50, rely = 0.05)
+        self.s = ttk.Style()
+        self.s.configure('my.TButton', font=self.fontStyle)        
+        button_close1 = ttk.Button(window, text="Close", style='my.TButton', command=window.destroy)
+        button_close1.place(relx = 0.50, rely = 0.90)
+        
 
     def popup_showinfo(self):
         showinfo("ShowInfo", "Hello World!")
@@ -372,7 +377,7 @@ class Application(Frame):
     def generate_total_revenues(self):
         
                
-        self.selected_year=2024
+        self.selected_year=2030
         
         # create Records object containing egypt data, weights and growfactors file 
         recs = Records(data=self.data_filename, weights=self.weights_filename, gfactors=GrowFactors(growfactors_filename=self.growfactors_filename))
@@ -409,52 +414,11 @@ class Application(Frame):
                
         y_add_space = 0.07
         df=pd.DataFrame()
-
-        '''Start calculations with start year of data '''
-
-        calc1.calc_all(2020)
-        weighted_citax1 = calc1.weighted_total('citax')
-        citax_collection1 = weighted_citax1.sum()
-        citax_collection_billions1 = citax_collection1/10**9
-        citax_collection_str1 = '{0:.2f}'.format(citax_collection_billions1)
-        print('\n\n\n')
-        print('TAX COLLECTION FOR THE YEAR: ', 2020)
-        print("The CIT Collection in billions is: ", citax_collection_str1)
-        dumpdf = calc1.dataframe(dump_vars)
-        dumpdf.to_csv('egypt_results_'+ str(2020) + '.csv', index=False, float_format='%.0f')
-        df['citax'+str(2020)] = dumpdf.groupby(dumpdf['Sector'])[['citax']].sum()
-        total_revenue_text = "TAX COLLECTION FOR THE YEAR - " + str(2020) + " is: " + str(citax_collection_str1) + " bn EGP"
-        revenue_label = Label(window, text=total_revenue_text, font=self.fontStyle)
-        revenue_label.place(relx = 0.05, rely = 0.20, anchor = "w")  
-
-        '''Read the calculated new loss data from the dataframe into bfloss variables '''
-        '''This will allow this data to replace the loss_lag var data with new loss data '''
-
-        bfloss1=dumpdf.newloss1
-        bfloss2=dumpdf.newloss2
-        bfloss3=dumpdf.newloss3
-        bfloss4=dumpdf.newloss4
-        bfloss5=dumpdf.newloss5
-        bfloss6=dumpdf.newloss6
-        bfloss7=dumpdf.newloss7
-        bfloss8=dumpdf.newloss8
-        bfloss=[bfloss1,bfloss2,bfloss3,bfloss4, bfloss5, bfloss6, bfloss7, bfloss8]
-        #losslag=['Loss_lag1', 'Loss_lag2', 'Loss_lag3', 'Loss_lag4', 'Loss_lag5', 'Loss_lag6', 'Loss_lag7', 'Loss_lag8']
-
+        total_revenue_text_dict={}
         i=1
-        for year in range(2021, 2025):
+        for year in range(2020, 2026):
             calc1.advance_to_year(year)    
-        # Produce DataFrame of results using cross-section
-        # Update the loss lag data in the current year (which loops from 2021 to 2024) with bf loss data 
-
-            calc1.array('Loss_lag1', np.array(bfloss1))
-            calc1.array('Loss_lag2', np.array(bfloss2))
-            calc1.array('Loss_lag3', np.array(bfloss3))
-            calc1.array('Loss_lag4', np.array(bfloss4))
-            calc1.array('Loss_lag5', np.array(bfloss5))
-            calc1.array('Loss_lag6', np.array(bfloss6))
-            calc1.array('Loss_lag7', np.array(bfloss7))
-            calc1.array('Loss_lag8', np.array(bfloss8))
+        
             calc1.calc_all()
             weighted_citax1 = calc1.weighted_total('citax')
             citax_collection1 = weighted_citax1.sum()
@@ -466,25 +430,28 @@ class Application(Frame):
             dumpdf = calc1.dataframe(dump_vars)
             dumpdf.to_csv('egypt_results_'+ str(year) + '.csv', index=False, float_format='%.0f')
             df['citax'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['citax']].sum()
-        
-        # Read the new loss data before the next loop begins to update the loss lag vars
-            bfloss1=dumpdf.newloss1
-            bfloss2=dumpdf.newloss2
-            bfloss3=dumpdf.newloss3
-            bfloss4=dumpdf.newloss4
-            bfloss5=dumpdf.newloss5
-            bfloss6=dumpdf.newloss6
-            bfloss7=dumpdf.newloss7
-            bfloss8=dumpdf.newloss8
-            
+            df['Donations_allowed'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Donations_allowed']].sum()
+            df['Exemptions'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Exemptions']].sum()
+            df['Revenues'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Revenues']].sum()
+            df['Used_loss_total'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Used_loss_total']].sum()
+            df['Add_Bld'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Add_Bld']].sum()
+            df['Add_Intang'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Add_Intang']].sum()
+            df['Add_Mach'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Add_Mach']].sum()
+            df['Add_Others'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Add_Others']].sum()
+            df['Add_Comp'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Add_Comp']].sum()
+
             total_revenue_text = "TAX COLLECTION FOR THE YEAR - " + str(year) + " is: " + str(citax_collection_str1) + " bn EGP"
             revenue_label = Label(window, text=total_revenue_text, font=self.fontStyle)
-            revenue_label.place(relx = 0.05, rely = 0.20 + y_add_space*i, anchor = "w")        
+            revenue_label.place(relx = 0.05, rely = 0.05 + y_add_space*i, anchor = "w")        
+            
             i += 1
         
+        dist1 = calc1.distribution_table_dataframe()
+        print(dist1.weight)
+        #self.popup_results_window(total_revenue_text)
         df = df/10**6
         df = df.rename(index={0.0:"Hotels", 1.0:"Banks", 2.0:"Oil&Gas", 3.0:"Gen Bus"})
-
+        df['Add_assets2020'] = df['Add_Bld2020'] + df['Add_Intang2020'] + df['Add_Mach2020'] + df['Add_Others2020'] + df['Add_Comp2020']
         cmap = plt.cm.tab10
         colors = cmap(np.arange(len(df)) % cmap.N)
         ax = df['citax2020'].plot(kind='bar', use_index=True, y='citax2020', 
@@ -493,11 +460,29 @@ class Application(Frame):
         ax.set_xlabel('Sectors')
         ax.set_title('CIT Collection (in million EGP) by Sector (2020)', fontweight="bold")
         plt.show()
-        #pic_filename1 = 'CIT Collection by Sector (2020).png' 
-        #plt.savefig(pic_filename1)
+        pic_filename1 = 'CIT Collection by Sector (2020).png' 
+        plt.savefig(pic_filename1)
         
+        ax1 = df['Donations_allowed2020'].plot(kind='bar', use_index=True, y='Donations_allowed2020', 
+                            legend=False, rot=90, figsize=(8,8), color=colors)
+        ax1.set_xlabel('Sectors')
+        ax1.set_title('Donations allowed as deduction (in million EGP) by Sector (2020)', fontweight="bold")
+        plt.show()
+
+        ax2 = df['Add_assets2020'].plot(kind='bar', use_index=True, y='Add_assets2020', 
+                            legend=False, rot=90, figsize=(8,8), color=colors)
+        ax2.set_xlabel('Sectors')
+        ax2.set_title('Additional Investment in assets (in million EGP) by Sector (2020)', fontweight="bold")
+        plt.show()
         
 
+        ax3 = df['Used_loss_total2020'].plot(kind='bar', use_index=True, y='Used_loss_total2020', 
+                            legend=False, rot=90, figsize=(8,8), color=colors)
+        ax3.set_xlabel('Sectors')
+        ax3.set_title('Used loss (in million EGP) by Sector (2020)', fontweight="bold")
+        plt.show()
+
+        
     ''' Read the policy reform parameters and their values from the reform menu fields and returns a dictionary of reform '''
 
     def read_reform_dict(self, block_selected_dict):
@@ -513,19 +498,19 @@ class Application(Frame):
                 if block_selected_dict[k]['selected_year']==year:
                     policy_dict['_'+block_selected_dict[k]['selected_item']]=[float(block_selected_dict[k]['selected_value'])]
             ref['policy'][int(year)] = policy_dict
+            print(ref)
         years.sort()
         years = [int(x) for x in years]
         return years, ref
     
     def apply_policy_change(self):
-        
-        for num in range(1, self.num_reforms):
+        self.block_selected_dict = {}
+        print(self.num_reforms)
+        for num in range(1, self.num_reforms+1):
+            self.block_selected_dict[num]={}
             self.block_selected_dict[num]['selected_item']= self.block_widget_dict[num][1].get()
             self.block_selected_dict[num]['selected_year']= self.block_widget_dict[num][2].get()
             self.block_selected_dict[num]['selected_value']= self.block_widget_dict[num][3].get()
-            if self.block_selected_dict[num]['selected_item'] == 'Loss_CFLimit':
-                self.block_selected_dict[num]['selected_value'] = int(self.block_selected_dict[num]['selected_value'])
-        
         print(self.block_selected_dict)
         
         recs = Records(data=self.data_filename, weights=self.weights_filename)
@@ -548,8 +533,9 @@ class Application(Frame):
 
         np.seterr(divide='ignore', invalid='ignore')
         
+        #generate policy reform pol2 as instance of Policy class
         pol2 = Policy(DEFAULTS_FILENAME=self.policy_filename)
-        
+        self.reform={}
         years, self.reform=self.read_reform_dict(self.block_selected_dict)
         print("reform dictionary: ",self.reform) 
         
@@ -576,68 +562,20 @@ class Application(Frame):
         revenue_amount_dict = {}
         num = 1
 
-        '''RUN THE CURRENT LAW POLICY CALCULATOR '''
-        calc1.calc_all(2020)
-        weighted_citax = calc1.weighted_total('citax')
-        citax_collection = weighted_citax.sum()
-        citax_collection_billions = citax_collection/10**9
-        citax_collection_str = '{0:.2f}'.format(citax_collection_billions)
-        print('\n\n\n')
-        print('TAX COLLECTION FOR THE YEAR: ', 2020)
-        print("The CIT Collection in billions is: ", citax_collection_str)
-        newlossvars =['newloss1', 'newloss2', 'newloss3', 'newloss4', 'newloss5', 'newloss6', 'newloss7', 'newloss8']
-        dumpdf = calc1.dataframe(newlossvars)
-        
-        #total_revenue_text = "TAX COLLECTION FOR THE YEAR 2020 is: " + str(citax_collection_str) + " bn EGP"
-        #revenue_label = Label(window, text=total_revenue_text, font=self.fontStyle)
-        #revenue_label.place(relx = 0.05, rely = 0.20, anchor = "w")  
-
-        bfloss1=dumpdf.newloss1
-        bfloss2=dumpdf.newloss2
-        bfloss3=dumpdf.newloss3
-        bfloss4=dumpdf.newloss4
-        bfloss5=dumpdf.newloss5
-        bfloss6=dumpdf.newloss6
-        bfloss7=dumpdf.newloss7
-        bfloss8=dumpdf.newloss8
-        bfloss=[bfloss1,bfloss2,bfloss3,bfloss4, bfloss5, bfloss6, bfloss7, bfloss8]
-
-               
-        for year in range(2021, 2025):  
+        for year in range(2020, 2025):  
             calc1.advance_to_year(year) 
             
             # NOTE: calc1 now contains a PRIVATE COPY of pol and a PRIVATE COPY of recs,
             #       so we can continue to use pol and recs in this script without any
             #       concern about side effects from Calculator method calls on calc1.
     
-            # Produce DataFrame of results using cross-section
-            calc1.array('Loss_lag1', np.array(bfloss1))
-            calc1.array('Loss_lag2', np.array(bfloss2))
-            calc1.array('Loss_lag3', np.array(bfloss3))
-            calc1.array('Loss_lag4', np.array(bfloss4))
-            calc1.array('Loss_lag5', np.array(bfloss5))
-            calc1.array('Loss_lag6', np.array(bfloss6))
-            calc1.array('Loss_lag7', np.array(bfloss7))
-            calc1.array('Loss_lag8', np.array(bfloss8))
-
             calc1.calc_all()
             weighted_citax1 = calc1.weighted_total('citax')
                     
             citax_collection_billions1 = weighted_citax1/10**9
             
             citax_collection_str1 = '{0:.2f}'.format(citax_collection_billions1)
-            newlossvars =['newloss1', 'newloss2', 'newloss3', 'newloss4', 'newloss5', 'newloss6', 'newloss7', 'newloss8']
-            dumpdf1 = calc1.dataframe(newlossvars)
-            bfloss1=dumpdf1.newloss1
-            bfloss2=dumpdf1.newloss2
-            bfloss3=dumpdf1.newloss3
-            bfloss4=dumpdf1.newloss4
-            bfloss5=dumpdf1.newloss5
-            bfloss6=dumpdf1.newloss6
-            bfloss7=dumpdf1.newloss7
-            bfloss8=dumpdf1.newloss8
-            print('\n\n\n')
-                        
+                      
             print("The CIT Collection in billions for " + str(year) + "is: ", citax_collection_str1)
             
             total_revenue_text[year] = "TAX COLLECTION UNDER CURRENT LAW FOR THE YEAR - " + str(year) + " : " + str(citax_collection_str1) + " bn EGP"
@@ -646,32 +584,12 @@ class Application(Frame):
             revenue_dict[year]['current_law']={}
             revenue_amount_dict[year]['current_law']={}
             revenue_dict[year]['current_law']['Label'] = Label(window, text=total_revenue_text[year], font=self.fontStyle)
-            revenue_dict[year]['current_law']['Label'].place(relx = 0.05, rely = 0.1+(num-1)*0.1, anchor = "w")
+            revenue_dict[year]['current_law']['Label'].place(relx = 0.05, rely = 0.1+(num-1)*0.05, anchor = "w")
             revenue_amount_dict[year]['current_law']['amount'] = citax_collection_str1
             num += 1
 
-
-        bfloss1=dumpdf.newloss1
-        bfloss2=dumpdf.newloss2
-        bfloss3=dumpdf.newloss3
-        bfloss4=dumpdf.newloss4
-        bfloss5=dumpdf.newloss5
-        bfloss6=dumpdf.newloss6
-        bfloss7=dumpdf.newloss7
-        bfloss8=dumpdf.newloss8
-        
-        for year in range(2021, 2025):  
+        for year in range(2020, 2025):  
             calc2.advance_to_year(year) 
-            
-            calc2.array('Loss_lag1', np.array(bfloss1))
-            calc2.array('Loss_lag2', np.array(bfloss2))
-            calc2.array('Loss_lag3', np.array(bfloss3))
-            calc2.array('Loss_lag4', np.array(bfloss4))
-            calc2.array('Loss_lag5', np.array(bfloss5))
-            calc2.array('Loss_lag6', np.array(bfloss6))
-            calc2.array('Loss_lag7', np.array(bfloss7))
-            calc2.array('Loss_lag8', np.array(bfloss8))
-            
             calc2.calc_all()
             
             weighted_citax2 = calc2.weighted_total('citax')
@@ -680,18 +598,6 @@ class Application(Frame):
             
             citax_collection_str2 = '{0:.2f}'.format(citax_collection_billions2)
             
-            newlossvars =['newloss1', 'newloss2', 'newloss3', 'newloss4', 'newloss5', 'newloss6', 'newloss7', 'newloss8']
-            dumpdf2 = calc2.dataframe(newlossvars)
-            bfloss1=dumpdf2.newloss1
-            bfloss2=dumpdf2.newloss2
-            bfloss3=dumpdf2.newloss3
-            bfloss4=dumpdf2.newloss4
-            bfloss5=dumpdf2.newloss5
-            bfloss6=dumpdf2.newloss6
-            bfloss7=dumpdf2.newloss7
-            bfloss8=dumpdf2.newloss8
-            print('\n\n\n')
-            dumpdf2.to_csv('lossfinal.csv')
             print("The CIT Collection in billions for " + str(year) + "is : ", citax_collection_str2)
             
             reform_revenue_text[year] = "TAX COLLECTION UNDER REFORM FOR THE YEAR - " + str(year)+"           : "+str(citax_collection_str2)+" bn EGP "
@@ -701,7 +607,7 @@ class Application(Frame):
             revenue_dict[year]['reform']={}
             revenue_amount_dict[year]['reform']={}         
             revenue_dict[year]['reform']['Label'] = Label(window, text=reform_revenue_text[year], font=self.fontStyle)
-            revenue_dict[year]['reform']['Label'].place(relx = 0.05, rely = 0.15+(num-1)*0.1, anchor = "w")            
+            revenue_dict[year]['reform']['Label'].place(relx = 0.05, rely = 0.15+(num-1)*0.05, anchor = "w")            
             revenue_amount_dict[year]['reform']['amount'] = citax_collection_str2
                     
             num += 1
@@ -722,19 +628,14 @@ class Application(Frame):
         ax.set_title('CIT Revenue - Current Law vs. Reforms', fontweight="bold")
         pic_filename2 = 'CIT - Current Law and Reforms.png'
         plt.savefig(pic_filename2)
-        
-        img1 = Image.open(pic_filename2)
-        img2 = img1.resize((500, 500), Image.ANTIALIAS)
-        img3 = ImageTk.PhotoImage(img2)
-        self.pic.configure(image=img3)
-        self.pic.image = img3
+        plt.show()
+        #img1 = Image.open(pic_filename2)
+        #img2 = img1.resize((500, 500), Image.ANTIALIAS)
+        #img3 = ImageTk.PhotoImage(img2)
+        #self.pic.configure(image=img3)
+        #self.pic.image = img3
 
-        
-
-
-        #df1, df2 = calc1.distribution_tables(calc2, 'weighted_deciles')
-        #print(df1, df2)
-        
+              
 
     def generate_tax_expenditures(self):
         
@@ -781,9 +682,7 @@ class Application(Frame):
         revenue_amount_dict = {}
         tax_expenditure = {}
         num = 1
-        dump_vars = ['Taxpayer_ID', 'Net_accounting_profit', 'Total_taxable_profit', \
-                    'Donations_Govt', 'Donations_allowed', 'Investment_incentive', \
-                    'Net_taxable_profit', 'Tax_base', 'Net_tax_base', 'citax']
+        
         #for year in range(years[0], years[-1]+1):            
         for year in range(2020, 2024):  
             calc1.advance_to_year(year)        
@@ -880,12 +779,14 @@ class Application(Frame):
         ax.set_title('CIT - Tax Collection under Current Law vs. Benchmark', fontweight="bold")
         pic_filename3 = 'CIT - Current Law and Benchmark.png'
         plt.savefig(pic_filename3)
+        plt.show()
         
+
         img1 = Image.open(pic_filename3)
         img2 = img1.resize((500, 500), Image.ANTIALIAS)
         img3 = ImageTk.PhotoImage(img2)
-        self.pic.configure(image=img3)
-        self.pic.image = img3
+        #self.pic.configure(image=img3)
+        #self.pic.image = img3
     
     
     def newselection1(self, event):
@@ -945,7 +846,7 @@ class Application(Frame):
         with open(self.sub_directory+'/'+self.policy_filename) as f:
             current_law_policy = json.load(f)
         current_law_policy_sorted = dict(sorted(current_law_policy.items()))    
-        policy_options_list = []
+        policy_options_list = ['None selected']
         for k, s in current_law_policy_sorted.items():
             #print(k)
             #print(current_law_policy[k]['description'])
@@ -992,7 +893,7 @@ class Application(Frame):
         self.selected_item = self.block_widget_dict[num][1].get()
         self.selected_value = self.current_law_policy['_'+ self.selected_item]['value'][0]
         self.selected_year = self.current_law_policy['_'+ self.selected_item]['row_label'][0]
-        self.block_selected_dict[num]['selected_item']= self.block_widget_dict[num][1].get()
+        self.block_selected_dict[num]['selected_item']= self.selected_item
         self.block_selected_dict[num]['selected_value']= self.current_law_policy['_'+ self.selected_item]['value'][0]
         self.block_selected_dict[num]['selected_year']= self.current_law_policy['_'+ self.selected_item]['row_label'][0]
         
@@ -1000,13 +901,15 @@ class Application(Frame):
         self.block_widget_dict[num][3].insert(END, self.selected_value)
         self.block_widget_dict[num][2].delete(0, END)
         self.block_widget_dict[num][2].insert(END, self.selected_year)
-
-        for num in range(1, self.num_reforms):        
+    '''
+    def update_policy_selection(self):
+        for num in range(1, self.num_reforms):
+            self.block_selected_dict[num]['selected_item']= self.block_widget_dict[num][1].get()        
             self.block_selected_dict[num]['selected_value']= self.block_widget_dict[num][3].get()
             self.block_selected_dict[num]['selected_year']= self.block_widget_dict[num][2].get()
-        
         print(self.block_selected_dict)
-        return
+        return self.block_selected_dict
+    '''
     # --- main ---
     
  

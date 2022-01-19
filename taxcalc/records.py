@@ -78,8 +78,8 @@ class Records(object):
     CITCSV_YEAR = 2020
 
     CUR_PATH = os.path.abspath(os.path.dirname(__file__))
-    CIT_DATA_FILENAME = 'dataegyptallsectors.csv'
-    CIT_WEIGHTS_FILENAME = 'cit_weights_egypt.csv'
+    CIT_DATA_FILENAME = 'bigdata_temp_withdepr.csv'
+    CIT_WEIGHTS_FILENAME = 'bigcit_weights_egypt.csv'
     VAR_INFO_FILENAME = 'records_variables_egypt.json'
 
     def __init__(self,
@@ -153,6 +153,7 @@ class Records(object):
         if self.gfactors is not None:
             self._blowup(self.__current_year)
         # specify current-year sample weights
+        
         if self.WT.size > 0:
             wt_colname = 'WT{}'.format(self.__current_year)
             self.weight = self.WT[wt_colname]
@@ -222,12 +223,23 @@ class Records(object):
         GF_Donations_Others = self.gfactors.factor_value('Donations_Others', year)
         GF_Donations_Govt = self.gfactors.factor_value('Donations_Govt', year)
         GF_Other_additions = self.gfactors.factor_value('Other_additions', year)
-        GF_Tax_depreciation = self.gfactors.factor_value('Tax_depreciation', year)
+        #GF_Tax_depreciation = self.gfactors.factor_value('Tax_depreciation', year)
         GF_Other_deductions = self.gfactors.factor_value('Other_deductions', year)
         GF_Carried_forward_losses = self.gfactors.factor_value('Carried_forward_losses', year)
         GF_Exemptions = self.gfactors.factor_value('Exemptions', year)
         GF_Investment_incentive = self.gfactors.factor_value('Investment_incentive', year)
         GF_Exchange_rate = self.gfactors.factor_value('Exchange_rate', year)
+        GF_Add_Bld = self.gfactors.factor_value('Add_Bld', year)
+        GF_Add_Intang = self.gfactors.factor_value('Add_Intang', year)
+        GF_Add_Mach = self.gfactors.factor_value('Add_Mach', year)
+        GF_Add_Others = self.gfactors.factor_value('Add_Others', year)
+        GF_Add_Comp = self.gfactors.factor_value('Add_Comp', year)
+        GF_Excl_Bld = self.gfactors.factor_value('Excl_Bld', year)
+        GF_Excl_Intang = self.gfactors.factor_value('Excl_Intang', year)
+        GF_Excl_Mach = self.gfactors.factor_value('Excl_Mach', year)
+        GF_Excl_Others = self.gfactors.factor_value('Excl_Others', year)
+        GF_Excl_Comp = self.gfactors.factor_value('Excl_Comp', year)
+
 
         self.Revenues *= GF_Revenues
         self.Other_revenues *= GF_Other_revenues
@@ -236,14 +248,23 @@ class Records(object):
         self.Donations_Others *= GF_Donations_Others
         self.Donations_Govt *= GF_Donations_Govt
         self.Other_additions *= GF_Other_additions
-        self.Tax_depreciation *= GF_Tax_depreciation
+        #self.Tax_depreciation *= GF_Tax_depreciation
         self.Other_deductions *= GF_Other_deductions
         self.Carried_forward_losses *= GF_Carried_forward_losses
         self.Exemptions *= GF_Exemptions
         self.Investment_incentive *= GF_Investment_incentive
         self.Exchange_rate *= GF_Exchange_rate
-
-
+        self.Add_Bld *= GF_Add_Bld
+        self.Add_Intang *= GF_Add_Intang
+        self.Add_Mach *= GF_Add_Mach
+        self.Add_Others *= GF_Add_Others
+        self.Add_Comp *= GF_Add_Comp
+        self.Excl_Bld *= GF_Excl_Bld
+        self.Excl_Intang *= GF_Excl_Intang
+        self.Excl_Mach *= GF_Excl_Mach
+        self.Excl_Others *= GF_Excl_Others
+        self.Excl_Comp *= GF_Excl_Comp
+        
 
     def _read_data(self, data):
         """
@@ -312,6 +333,7 @@ class Records(object):
             var.fill(0.)
         del var
 
+    
     def _read_weights(self, weights):
         """
         Read Records weights from file or
