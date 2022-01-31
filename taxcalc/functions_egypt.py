@@ -37,19 +37,85 @@ def Total_taxable_profit(Net_accounting_profit, Total_additions_to_GP, Total_tax
     return Total_taxable_profit
 
 @iterate_jit(nopython=True)
-def Tax_depreciation(Tax_depreciation, Tax_depr):
+def Op_WDV_depr(Op_WDV_Bld, Op_WDV_Intang, Op_WDV_Mach, Op_WDV_Others, Op_WDV_Comp):
     """
-    Compute net taxable profits afer allowing deductions.
+    Return the opening WDV of each asset class.
     """
-    Tax_depr = Tax_depreciation
+    Op_WDV_Bld, Op_WDV_Intang, Op_WDV_Mach, Op_WDV_Others, Op_WDV_Comp = (Op_WDV_Bld, 
+    Op_WDV_Intang, Op_WDV_Mach, Op_WDV_Others, Op_WDV_Comp)
+    return (Op_WDV_Bld, Op_WDV_Intang, Op_WDV_Mach, Op_WDV_Others, Op_WDV_Comp)
+
+@iterate_jit(nopython=True)
+def Tax_depr_Bld(Op_WDV_Bld, Add_Bld, Excl_Bld, rate_depr_bld, Tax_depr_Bld):
+    """
+    Compute tax depreciation of building asset class.
+    """
+    Tax_depr_Bld = max(rate_depr_bld*(Op_WDV_Bld + Add_Bld - Excl_Bld),0)
+    return Tax_depr_Bld
+
+@iterate_jit(nopython=True)
+def Tax_depr_Intang(Op_WDV_Intang, Add_Intang, Excl_Intang, rate_depr_intang, Tax_depr_Intang):
+    """
+    Compute tax depreciation of intangibles asset class
+    """
+    Tax_depr_Intang = max(rate_depr_intang*(Op_WDV_Intang + Add_Intang - Excl_Intang),0)
+    return Tax_depr_Intang
+
+@iterate_jit(nopython=True)
+def Tax_depr_Mach(Op_WDV_Mach, Add_Mach, Excl_Mach, rate_depr_mach, Tax_depr_Mach):
+    """
+    Compute tax depreciation of Machinary asset class
+    """
+    Tax_depr_Mach = max(rate_depr_mach*(Op_WDV_Mach + Add_Mach - Excl_Mach),0)
+    return Tax_depr_Mach
+
+@iterate_jit(nopython=True)
+def Tax_depr_Others(Op_WDV_Others, Add_Others, Excl_Others, rate_depr_others, Tax_depr_Others):
+    """
+    Compute tax depreciation of Other asset class
+    """
+    Tax_depr_Others = max(rate_depr_others*(Op_WDV_Others + Add_Others - Excl_Others),0)
+    return Tax_depr_Others
+
+@iterate_jit(nopython=True)
+def Tax_depr_Comp(Op_WDV_Comp, Add_Comp, Excl_Comp, rate_depr_comp, Tax_depr_Comp):
+    """
+    Compute tax depreciation of Computer asset class
+    """
+    Tax_depr_Comp = max(rate_depr_comp*(Op_WDV_Comp + Add_Comp - Excl_Comp),0)
+    return Tax_depr_Comp
+
+@iterate_jit(nopython=True)
+def Tax_depreciation(Tax_depr_Bld, Tax_depr_Intang, Tax_depr_Mach, Tax_depr_Others, Tax_depr_Comp, Tax_depr):
+    """
+    Compute total depreciation of all asset classes.
+    """
+    Tax_depr = Tax_depr_Bld + Tax_depr_Intang + Tax_depr_Mach + Tax_depr_Others + Tax_depr_Comp
     return Tax_depr
+
+@iterate_jit(nopython=True)
+def Cl_WDV_depr(Op_WDV_Bld, Add_Bld, Excl_Bld, Tax_depr_Bld, 
+                Op_WDV_Intang, Add_Intang, Excl_Intang, Tax_depr_Intang,
+                Op_WDV_Mach, Add_Mach, Excl_Mach, Tax_depr_Mach,
+                Op_WDV_Others, Add_Others, Excl_Others, Tax_depr_Others,
+                Op_WDV_Comp, Add_Comp, Excl_Comp, Tax_depr_Comp,
+                Cl_WDV_Bld, Cl_WDV_Intang, Cl_WDV_Mach, Cl_WDV_Others, Cl_WDV_Comp):
+    """
+    Compute Closing WDV of each block of asset.
+    """
+    Cl_WDV_Bld = max((Op_WDV_Bld + Add_Bld - Excl_Bld),0) - Tax_depr_Bld
+    Cl_WDV_Intang = max((Op_WDV_Intang + Add_Intang - Excl_Intang),0) - Tax_depr_Intang
+    Cl_WDV_Mach = max((Op_WDV_Mach + Add_Mach - Excl_Mach),0) - Tax_depr_Mach
+    Cl_WDV_Others = max((Op_WDV_Others + Add_Others - Excl_Others),0) - Tax_depr_Others
+    Cl_WDV_Comp= max((Op_WDV_Comp + Add_Comp - Excl_Comp),0) - Tax_depr_Comp
+    return (Cl_WDV_Bld, Cl_WDV_Intang, Cl_WDV_Mach, Cl_WDV_Others, Cl_WDV_Comp)
 
 @iterate_jit(nopython=True)
 def Total_deductions(Tax_depr, Other_deductions, Donations_Govt, Donations_Govt_rate, Total_deductions):
     """
     Compute net taxable profits afer allowing deductions.
     """
-    Total_deductions = Tax_depr + Other_deductions + Donations_Govt_rate*Donations_Govt
+    Total_deductions = Tax_depr + Other_deductions + (Donations_Govt_rate*Donations_Govt)
     return Total_deductions
 
 @iterate_jit(nopython=True)
@@ -66,7 +132,6 @@ def Donations_allowed(Donations_NGO, Donations_Others, Donations_NGO_rate, Net_t
     Compute net taxable profits afer allowing deductions.
     """
     Donations_allowed = min(Donations_NGO, max(0, Donations_NGO_rate*Net_taxable_profit)) + Donations_Others_rate*Donations_Others
-    #Donations_allowed = Donations_NGO + Donations_Others_rate*Donations_Others
     return Donations_allowed
 
 @iterate_jit(nopython=True)
@@ -80,43 +145,51 @@ def Carried_forward_losses(Carried_forward_losses, CF_losses):
 
 
 @iterate_jit(nopython=True)
-def Tax_base_CF_losses(Net_taxable_profit, Donations_allowed, Loss_CFLimit, 
+def Tax_base_CF_losses(Net_taxable_profit, Donations_allowed, Loss_CFLimit, CF_losses,
     Loss_lag1, Loss_lag2, Loss_lag3, Loss_lag4, Loss_lag5, Loss_lag6, Loss_lag7, Loss_lag8,
-    newloss1, newloss2, newloss3, newloss4, newloss5, newloss6, newloss7, newloss8, Tax_base):
+    newloss1, newloss2, newloss3, newloss4, newloss5, newloss6, newloss7, newloss8, Used_loss_total, Tax_base):
     
     """
     Compute net tax base afer allowing donations and losses.
     """
-    BF_loss = np.array([Loss_lag1, Loss_lag2, Loss_lag3, Loss_lag4, 
-    Loss_lag5, Loss_lag6, Loss_lag7, Loss_lag8])
-    print(BF_loss)
-    N = int(Loss_CFLimit)
-    BF_loss = BF_loss[:N]
-    Gross_Tax_base = min(Net_taxable_profit, max((Net_taxable_profit - Donations_allowed), 0))
+    BF_loss = np.array([Loss_lag1, Loss_lag2, Loss_lag3, Loss_lag4, Loss_lag5, Loss_lag6, Loss_lag7, Loss_lag8])
     
-    if Gross_Tax_base < 0:
-        CYL = abs(Gross_Tax_base)
-        Used_loss = np.zeros(N)
+    Gross_Tax_base = min(Net_taxable_profit, max((Net_taxable_profit - Donations_allowed), 0))
+
+    if BF_loss.sum() == 0:
+        BF_loss[0] = CF_losses
+
+    N = int(Loss_CFLimit)
+    if N == 0:
+        (newloss1, newloss2, newloss3, newloss4, newloss5, newloss6, newloss7, newloss8) = np.zeros(8)
+        Used_loss_total = 0
+        Tax_base = Gross_Tax_base
         
     else:
-        CYL = 0
-        Cum_used_loss = 0
-        Used_loss = np.zeros(N)
-        for i in range(N, 0, -1):
-            GTI = Gross_Tax_base - Cum_used_loss
-            Used_loss[i-1] = min(BF_loss[i-1], GTI)
-            Cum_used_loss += Used_loss[i-1]
+        BF_loss = BF_loss[:N]
+                
+        if Gross_Tax_base < 0:
+            CYL = abs(Gross_Tax_base)
+            Used_loss = np.zeros(N)
+        elif Gross_Tax_base >0:
+            CYL = 0
+            Cum_used_loss = 0
+            Used_loss = np.zeros(N)
+            for i in range(N, 0, -1):
+                GTI = Gross_Tax_base - Cum_used_loss
+                Used_loss[i-1] = min(BF_loss[i-1], GTI)
+                Cum_used_loss += Used_loss[i-1]
+        elif Gross_Tax_base == 0:
+            CYL=0
+            Used_loss = np.zeros(N)
     
-    New_loss = BF_loss - Used_loss
-        
-    Tax_base = Gross_Tax_base - Used_loss.sum()
+        New_loss = BF_loss - Used_loss
+        Tax_base = Gross_Tax_base - Used_loss.sum()
+        newloss1 = CYL
+        Used_loss_total = Used_loss.sum()
+        (newloss2, newloss3, newloss4, newloss5, newloss6, newloss7, newloss8) = np.append(New_loss[:-1], np.zeros(8-N))
 
-    newloss1 = CYL
-
-    (newloss2, newloss3, newloss4, 
-    newloss5, newloss6, newloss7, newloss8) = np.append(New_loss[:-1], np.zeros(8-N))
-
-    return (Tax_base, newloss1, newloss2, newloss3, newloss4, newloss5, newloss6, newloss7, newloss8)
+    return (Tax_base, newloss1, newloss2, newloss3, newloss4, newloss5, newloss6, newloss7, newloss8, Used_loss_total)
 
 
 @iterate_jit(nopython=True)

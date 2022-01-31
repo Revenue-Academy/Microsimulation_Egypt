@@ -17,9 +17,12 @@ import pandas as pd
 #from taxcalc.functions import (net_salary_income, taxable_income,
 #                               pit_liability)
 from taxcalc.functions_egypt import (Net_accounting_profit, Total_additions_to_GP, Total_taxable_profit,\
-                                    Tax_depreciation, Total_deductions, Net_taxable_profit, Donations_allowed,\
-                                    Carried_forward_losses, Tax_base_CF_losses, Net_tax_base, Net_tax_base_Egyp_Pounds,\
-                                    cit_liability)
+                                    Op_WDV_depr, Tax_depr_Bld, Tax_depr_Intang, Tax_depr_Mach, Tax_depr_Others,\
+                                    Tax_depr_Comp, Cl_WDV_depr, Tax_depreciation, Total_deductions,\
+                                    Net_taxable_profit, Donations_allowed,\
+                                    Carried_forward_losses, Tax_base_CF_losses, Net_tax_base, \
+                                    Net_tax_base_Egyp_Pounds, cit_liability)
+
 #from taxcalc.gstfunctions import (gst_liability)
 from taxcalc.policy import Policy
 from taxcalc.records import Records
@@ -133,11 +136,46 @@ class Calculator(object):
         """
         Advance all embedded objects to next year.
         """
+        
+        bf_loss1 = self.__records.newloss1
+        bf_loss2 = self.__records.newloss2
+        bf_loss3 = self.__records.newloss3
+        bf_loss4 = self.__records.newloss4
+        bf_loss5 = self.__records.newloss5
+        bf_loss6 = self.__records.newloss6
+        bf_loss7 = self.__records.newloss7
+        bf_loss8 = self.__records.newloss8
+
+        cl_wdv_bld = self.__records.Cl_WDV_Bld
+        cl_wdv_intang = self.__records.Cl_WDV_Intang
+        cl_wdv_mach = self.__records.Cl_WDV_Mach
+        cl_wdv_others = self.__records.Cl_WDV_Others
+        cl_wdv_comp = self.__records.Cl_WDV_Comp
+
         next_year = self.__policy.current_year + 1
+        self.__policy.set_year(next_year)
+        
         self.__records.increment_year()
+       
+        self.__records.Loss_lag1 = bf_loss1
+        self.__records.Loss_lag2 = bf_loss2
+        self.__records.Loss_lag3 = bf_loss3
+        self.__records.Loss_lag4 = bf_loss4
+        self.__records.Loss_lag5 = bf_loss5
+        self.__records.Loss_lag6 = bf_loss6
+        self.__records.Loss_lag7 = bf_loss7
+        self.__records.Loss_lag8 = bf_loss8
+
+        self.__records.Op_WDV_Bld = cl_wdv_bld
+        self.__records.Op_WDV_Intang = cl_wdv_intang
+        self.__records.Op_WDV_Mach = cl_wdv_mach
+        self.__records.Op_WDV_Others = cl_wdv_others
+        self.__records.Op_WDV_Comp = cl_wdv_comp
+        
+        #self.__records.increment_year()
         #self.__gstrecords.increment_year()
         #self.__corprecords.increment_year()
-        self.__policy.set_year(next_year)
+       
 
     def advance_to_year(self, year):
         """
@@ -162,13 +200,20 @@ class Calculator(object):
         assert self.__records.current_year == self.__policy.current_year
         #assert self.__gstrecords.current_year == self.__policy.current_year
         #assert self.__corprecords.current_year == self.__policy.current_year
-        self.__records.zero_out_changing_calculated_vars()
+        #self.__records.zero_out_changing_calculated_vars()
         # For now, don't zero out for corporate
         # pdb.set_trace()
         # Corporate calculations
         Net_accounting_profit(self.__policy, self.__records)
         Total_additions_to_GP(self.__policy, self.__records)
         Total_taxable_profit(self.__policy, self.__records)
+        Op_WDV_depr(self.__policy, self.__records)
+        Tax_depr_Bld(self.__policy, self.__records)
+        Tax_depr_Intang(self.__policy, self.__records)
+        Tax_depr_Mach(self.__policy, self.__records)
+        Tax_depr_Others(self.__policy, self.__records)
+        Tax_depr_Comp(self.__policy, self.__records)
+        Cl_WDV_depr(self.__policy, self.__records)
         Tax_depreciation(self.__policy, self.__records)
         Total_deductions(self.__policy, self.__records)
         Net_taxable_profit(self.__policy, self.__records)

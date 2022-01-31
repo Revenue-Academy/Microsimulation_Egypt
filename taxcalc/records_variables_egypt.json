@@ -59,11 +59,82 @@
       "desc": "Donations to registered NGOs and institutions",
       "form": {"2020": "Item 310 - carried forward from Table 402 - Tax Return Legal Persons"}
     },
-    "Tax_depreciation": {
+    "Op_WDV_Bld": {
       "type": "float",
-      "desc": "Other deductions allowed as per tax law",
-      "form": {"2020": "carried forward from Table 413  - Tax Return Legal Persons"}
+      "desc": "Opening WDV of Buildings asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
     },
+    "Op_WDV_Intang": {
+      "type": "float",
+      "desc": "Opening WDV of Intangibles asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Op_WDV_Mach": {
+      "type": "float",
+      "desc": "Opening WDV of Intangibles asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Op_WDV_Others": {
+      "type": "float",
+      "desc": "Opening WDV of Other asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Op_WDV_Comp": {
+      "type": "float",
+      "desc": "Opening WDV of Computers asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Add_Bld": {
+      "type": "float",
+      "desc": "Additions to Buildings",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Add_Intang": {
+      "type": "float",
+      "desc": "Additions to Intangibles",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Add_Mach": {
+      "type": "float",
+      "desc": "Additions to Machinary",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Add_Others": {
+      "type": "float",
+      "desc": "Additions to Other assets",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Add_Comp": {
+      "type": "float",
+      "desc": "Additions to Computers",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Excl_Bld": {
+      "type": "float",
+      "desc": "Exclusions from Buildings",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Excl_Intang": {
+      "type": "float",
+      "desc": "Exclusions from Intangibles",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Excl_Mach": {
+      "type": "float",
+      "desc": "Exclusions from Machinary",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Excl_Others": {
+      "type": "float",
+      "desc": "Exclusions Other assets",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+    "Excl_Comp": {
+      "type": "float",
+      "desc": "Exclusions from Computers",
+      "form": {"2020": "carried forward from Table 411B - Tax Return Legal Persons"}
+    },
+
     "Other_deductions": {
       "type": "float",
       "desc": "Deductions from total taxable profits other than tax depreciation",
@@ -231,8 +302,62 @@
       "type": "float",
       "desc": "Carried forward loss - eight years old",
       "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Used_loss_total": {
+      "type": "float",
+      "desc": "Used loss out of brought forward losses or loss lag 1 to 8",
+      "form": {"2020": "Sch 412 - Tax Return Legal Persons"}
+    },
+    "Tax_depr_Bld": {
+      "type": "float",
+      "desc": "Tax depreciation - Buildings",
+      "form": {"2020": "Sch 411B - Tax Return Legal Persons"}
+    },
+    "Tax_depr_Intang": {
+      "type": "float",
+      "desc": "Tax depreciation - Intangibles",
+      "form": {"2020": "Sch 411B - Tax Return Legal Persons"}
+    },
+    "Tax_depr_Mach": {
+      "type": "float",
+      "desc": "Tax depreciation - Machinary",
+      "form": {"2020": "Sch 411B - Tax Return Legal Persons"}
+    },
+    "Tax_depr_Others": {
+      "type": "float",
+      "desc": "Tax depreciation - Other assets",
+      "form": {"2020": "Sch 411B - Tax Return Legal Persons"}
+    },
+    "Tax_depr_Comp": {
+      "type": "float",
+      "desc": "Tax depreciation - Computers",
+      "form": {"2020": "Sch 411B - Tax Return Legal Persons"}
+    },
+    "Cl_WDV_Bld": {
+      "type": "float",
+      "desc": "Closing WDV of Buildings asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Cl_WDV_Intang": {
+      "type": "float",
+      "desc": "Closing WDV of Intangibles asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Cl_WDV_Mach": {
+      "type": "float",
+      "desc": "Closing WDV of Intangibles asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Cl_WDV_Others": {
+      "type": "float",
+      "desc": "Closing WDV of Other asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Cl_WDV_Comp": {
+      "type": "float",
+      "desc": "Closing WDV of Computers asset class",
+      "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
     }
-    
   }
   
 }
