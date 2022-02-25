@@ -234,6 +234,13 @@ class Calculator(object):
         """
         return (self.array(variable_name) * self.array('weight')).sum()
 
+    
+    def weighted_array(self, variable_name):
+        """
+        Return all-filing-unit weighted total of named Records variable.
+        """
+        return (self.array(variable_name) * self.array('weight'))
+    
     def weighted_garray(self, variable_name):
         """
         Return all-filing-unit weighted total of named Records variable.
@@ -262,6 +269,17 @@ class Calculator(object):
         arys = [self.array(vname) for vname in variable_list]
         pdf = pd.DataFrame(data=np.column_stack(arys), columns=variable_list)
         del arys
+        return pdf
+    
+    def weighted_dataframe(self, variable_list):
+        """
+        Return pandas DataFrame containing the listed variables from embedded
+        Records object.
+        """
+        assert isinstance(variable_list, list)
+        wt_arys = [self.array(vname)*self.array('weight') for vname in variable_list]
+        pdf = pd.DataFrame(data=np.column_stack(wt_arys), columns=variable_list)
+        del wt_arys
         return pdf
 
     def dataframe_cit(self, variable_list):
