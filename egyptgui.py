@@ -112,7 +112,7 @@ class Application(Frame):
         
         '''Creating a Label for Tax Microsimulation Model'''
 
-        self.root_title=Label(text="CIT Microsimulation Model",
+        self.root_title=Label(text="Egypt CIT Microsimulation Model",
                  font = self.fontStyle_title)
         self.root_title.place(relx = self.title_pos_x, rely = self.title_pos_y, anchor = "n")
         
@@ -286,8 +286,8 @@ class Application(Frame):
     '''THEN IT ALLOWS USER TO FILL NEW VALUES OF YEAR AND VALUE OF REFORM PARAM IN THE INPUT FIELDS'''
 
     def insert_image(self, pic_file):
-        #self.image=Image.open('egypt_flag.jpg')
-        self.image=Image.open(pic_file)
+        self.image=Image.open('egypt_flag.jpg')
+        #self.image=Image.open(pic_file)
         basewidth = 400
         wpercent = (basewidth/float(self.image.size[0]))
         hsize = int((float(self.image.size[1])*float(wpercent)))
