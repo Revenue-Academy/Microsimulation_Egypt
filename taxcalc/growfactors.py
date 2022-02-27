@@ -44,8 +44,9 @@ class GrowFactors(object):
     # TODO: currently set as same. New field names should be read in case we
     # TODO: want separate growfactors for Corporate and Non-corporate data.
     VALID_NAMES = set(['CPI', 'Revenues', 'Other_revenues', 'Expenses', 'Donations_NGO', 'Donations_Others',
-    'Other_additions', 'Tax_depreciation', 'Other_deductions', 'Donations_Govt', 'Carried_forward_losses', 'Exemptions', 
-    'Investment_incentive', 'Exchange_rate'])
+    'Other_additions', 'Other_deductions', 'Donations_Govt', 'Carried_forward_losses', 'Exemptions', 
+    'Investment_incentive', 'Exchange_rate', 'Add_Bld', 'Add_Intang', 'Add_Mach', 'Add_Others', 'Add_Comp',
+    'Excl_Bld', 'Excl_Intang', 'Excl_Mach', 'Excl_Others', 'Excl_Comp'])
 
     def __init__(self, growfactors_filename=FILE_PATH):
         # read grow factors from specified growfactors_filename
