@@ -32,7 +32,6 @@ DIST_TABLE_LABELS = ['Returns',
                      'Net taxable profit',
                      'Tax base after deductions',
                      'Tax base after exemption',
-                     'Tax @ Normal Rates',
                      'CIT liability']
 
 DECILE_ROW_NAMES = ['0-10n', '0-10z', '0-10p',
@@ -41,9 +40,8 @@ DECILE_ROW_NAMES = ['0-10n', '0-10z', '0-10p',
                     'ALL',
                     '90-95', '95-99', 'Top 1%']
 
-STANDARD_ROW_NAMES = ['<0', '=0', '0-1 MN', '1-5 MN', '5-10 MN', '10-15 MN',
-                      '15-20 MN', '20-30 MN', '30-40 MN', '40-50 MN',
-                      '50-100 MN', '>100 MN', 'ALL']
+STANDARD_ROW_NAMES = ['<0', '=0', '0-1 MN', '1-5 MN', '5-10 MN', '10-20 MN',
+                      '20-30 MN', '30-40 MN', '40-50 MN', '50-100 MN', '>100 MN', 'ALL']
 
 STANDARD_INCOME_BINS = [-9e99, -1e-9, 1e-9, 1e6, 5e6, 10e6, 20e6, 30e6,
                         40e6, 50e6, 100e6, 9e99]
@@ -217,8 +215,10 @@ def create_distribution_table(vdf, groupby, income_measure,
         for col in DIST_TABLE_COLUMNS:
             if col == 'weight':
                 sdf[col] = gpdf.apply(unweighted_sum, col)
+                #sdf[col] = gpdf[col]
             else:
                 sdf[col] = gpdf.apply(weighted_sum, col)
+                #sdf[col] = gpdf[col] * 2.2
         return sdf
     # main logic of create_distribution_table
     assert isinstance(vdf, pd.DataFrame)
@@ -236,8 +236,16 @@ def create_distribution_table(vdf, groupby, income_measure,
         pdf = add_income_table_row_variable(vdf, income_measure,
                                             STANDARD_INCOME_BINS)
     # construct grouped DataFrame
-    gpdf = pdf.groupby('table_row', as_index=False)
-    dist_table = stat_dataframe(gpdf)
+    gpdf = pdf.groupby('table_row', as_index=False).sum()
+    #gpdf = pdf.groupby('table_row', as_index=False)
+    #dist_table = stat_dataframe(gpdf)
+    dist_table = pd.DataFrame()
+    for col in DIST_TABLE_COLUMNS:
+            if col == 'weight':
+                dist_table[col] = gpdf[col]
+            else:
+                dist_table[col] = gpdf[col] * pdf['weight']
+    
     del pdf['table_row']
     # compute sum row
     sum_row = get_sums(dist_table)[dist_table.columns]
@@ -285,12 +293,12 @@ def create_distribution_table(vdf, groupby, income_measure,
     if scaling:
         for col in DIST_TABLE_COLUMNS:
             if col == 'weight':
-                dist_table[col] = np.round(dist_table[col] * 1e-5, 3)
+                dist_table[col] = np.round(dist_table[col], 3)
             else:
                 if averages:
                     dist_table[col] = np.round(dist_table[col] * 1, 0)
                 else:
-                    dist_table[col] = np.round(dist_table[col] * 1e-7, 3)
+                    dist_table[col] = np.round(dist_table[col] * 1e-9, 3)
     # return table as Pandas DataFrame
     vdf.sort_index(inplace=True)
     return dist_table

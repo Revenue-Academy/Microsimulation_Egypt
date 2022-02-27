@@ -13,11 +13,13 @@ import tkinter.font as tkfont
 from tkinter.messagebox import showinfo
 
 from tkinter import filedialog
+from turtle import color
 
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
+import seaborn as sns
 
 from taxcalc import *
 
@@ -43,8 +45,8 @@ class Application(Frame):
         self.selected_value = ""
         self.selected_year = 2020
         self.sub_directory = "taxcalc"
-        self.data_filename = "smalldataegyptallsectorswithlossdep.csv"
-        self.weights_filename = "smallcit_weights_egypt.csv"
+        self.data_filename = "bigdata_temp_withdepr.csv"
+        self.weights_filename = "bigcit_weights_egypt.csv"
         self.policy_filename = "current_law_policy_cit_egypt.json"
         self.records_vars_filename = "records_variables_egypt.json"
         self.growfactors_filename = self.sub_directory+"/"+"growfactors_egypt.csv"    
@@ -53,13 +55,13 @@ class Application(Frame):
         self.reform_revenue_text1 = ""
         #self.reform_filename = "egypt_reform.json"
 
-        self.fontStyle = tkfont.Font(family="Helvetica", size="10")
+        self.fontStyle = tkfont.Font(family="Helvetica", size="12")
         self.fontStyle_sub_title = tkfont.Font(family="Helvetica", size="14", weight="bold")         
         self.fontStyle_title = tkfont.Font(family="Helvetica", size="18", weight="bold")
         self.s = ttk.Style()
         self.s.configure('my.TButton', font=self.fontStyle)        
-        self.text_font = ('Arial', '10')
-        self.insert_image('egypt_flag.jpg')      
+        self.text_font = ('Arial', '12')
+        self.insert_image('world_bank.png')      
         # positions
         
         self.title_pos_x = 0.5
@@ -110,7 +112,7 @@ class Application(Frame):
         
         '''Creating a Label for Tax Microsimulation Model'''
 
-        self.root_title=Label(text="EGYPT CIT Microsimulation Model",
+        self.root_title=Label(text="Egypt CIT Microsimulation Model",
                  font = self.fontStyle_title)
         self.root_title.place(relx = self.title_pos_x, rely = self.title_pos_y, anchor = "n")
         
@@ -284,8 +286,8 @@ class Application(Frame):
     '''THEN IT ALLOWS USER TO FILL NEW VALUES OF YEAR AND VALUE OF REFORM PARAM IN THE INPUT FIELDS'''
 
     def insert_image(self, pic_file):
-        #self.image=Image.open('egypt_flag.jpg')
-        self.image=Image.open(pic_file)
+        self.image=Image.open('egypt_flag.jpg')
+        #self.image=Image.open(pic_file)
         basewidth = 400
         wpercent = (basewidth/float(self.image.size[0]))
         hsize = int((float(self.image.size[1])*float(wpercent)))
@@ -399,9 +401,33 @@ class Application(Frame):
 
         # popup window for the Results
         window = tk.Toplevel()
-        window.geometry("600x500+140+140")
-        label = tk.Label(window, text="Results")
+        window.geometry("900x700+140+140")
+        label = tk.Label(window, text="Results", font=self.fontStyle_title)
         label.place(relx = 0.50, rely = 0.05)
+        #Create Treeview widgets for output window
+        style = ttk.Style()
+        style.theme_use("default")
+        style.configure("mystyle.Treeview", rowheight=30, bd=0, font=('Calibri', 12)) # Modify the font of the body
+        style.configure("mystyle.Treeview.Heading", font=('Calibri', 10,'bold')) # Modify the font of the headings
+        
+        tree = ttk.Treeview(window, columns=(1, 2, 3, 4, 5, 6, 7), padding=10, show='headings', height=10, style="mystyle.Treeview")
+        tree.column(1, width=100, anchor=CENTER)
+        tree.heading(1, text="Year")
+        tree.column(2, width=100, anchor=CENTER)
+        tree.heading(2, text="Net acc profit")
+        tree.column(3, width=100, anchor=CENTER)
+        tree.heading(3, text="Tax depr")
+        tree.column(4, width=100, anchor=CENTER)
+        tree.heading(4, text="Donations")
+        tree.column(5, width=100, anchor=CENTER)
+        tree.heading(5, text="Used Loss")
+        tree.column(6, width=100, anchor=CENTER)
+        tree.heading(6, text="Net tax liability(bn EGP)")
+        tree.column(7, width=100, anchor=CENTER)
+        tree.heading(7, text="% Change")
+        tree.place(relx = 0.1, rely = 0.15)
+
+
         self.s = ttk.Style()
         self.s.configure('my.TButton', font=self.fontStyle)        
         button_close1 = ttk.Button(window, text="Close", style='my.TButton', command=window.destroy)
@@ -411,24 +437,46 @@ class Application(Frame):
 
         dump_vars = self.read_calc_variables()
         #dump_vars = ['Taxpayer_ID', 'Revenues', 'Tax_base', 'citax']
-               
+        wt_cit = []  
+        year_list = []     
         y_add_space = 0.07
         df=pd.DataFrame()
+        df1=pd.DataFrame()
         total_revenue_text_dict={}
-        i=1
-        for year in range(2020, 2026):
+        start_year = 2020
+        end_year = 2030
+        i=0
+        for year in range(start_year, end_year):
+            print(df1)
             calc1.advance_to_year(year)    
-        
             calc1.calc_all()
+            wt_accounting_profit = round(calc1.weighted_total('Net_accounting_profit')/10**9, 2)
+            wt_tax_depr = round(calc1.weighted_total('Tax_depr')/10**9, 2)
+            wt_donations = round(calc1.weighted_total('Donations_allowed')/10**9, 2)
+            wt_used_loss = round(calc1.weighted_total('Used_loss_total')/10**9, 2)
             weighted_citax1 = calc1.weighted_total('citax')
+            weighted_citax1_bn = round(weighted_citax1/10**9, 2)
+            wt_cit += [weighted_citax1_bn]
+            year_list += [year]
             citax_collection1 = weighted_citax1.sum()
             citax_collection_billions1 = citax_collection1/10**9
             citax_collection_str1 = '{0:.2f}'.format(citax_collection_billions1)
             print('\n\n\n')
             print('TAX COLLECTION FOR THE YEAR: ', year)
             print("The CIT Collection in billions is: ", citax_collection_str1)
-            dumpdf = calc1.dataframe(dump_vars)
-            dumpdf.to_csv('egypt_results_'+ str(year) + '.csv', index=False, float_format='%.0f')
+            dumpdf1 = calc1.dataframe(dump_vars)
+            dumpdf1.to_csv('egypt_results_'+ str(year) + '.csv', index=False, float_format='%.0f')
+            dumpdf = calc1.weighted_dataframe(dump_vars)
+            if i == 0:
+                pct_change = 0
+            else:
+                pct_change = round((wt_cit[i] - wt_cit[i-1])*100/(wt_cit[i-1]),2)
+            pct_change = str(pct_change) + " %"            
+            
+            tree.insert('', 'end', text="1", values=(str(year), str(wt_accounting_profit), 
+                        str(wt_tax_depr), str(wt_donations), str(wt_used_loss),  str(weighted_citax1_bn), pct_change))
+            
+            dumpdf['Sector'] = dumpdf1['Sector']
             df['citax'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['citax']].sum()
             df['Donations_allowed'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Donations_allowed']].sum()
             df['Exemptions'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Exemptions']].sum()
@@ -441,19 +489,44 @@ class Application(Frame):
             df['Add_Comp'+str(year)] = dumpdf.groupby(dumpdf['Sector'])[['Add_Comp']].sum()
 
             total_revenue_text = "TAX COLLECTION FOR THE YEAR - " + str(year) + " is: " + str(citax_collection_str1) + " bn EGP"
-            revenue_label = Label(window, text=total_revenue_text, font=self.fontStyle)
-            revenue_label.place(relx = 0.05, rely = 0.05 + y_add_space*i, anchor = "w")        
+            #revenue_label = Label(window, text=total_revenue_text, font=self.fontStyle)
+            #revenue_label.place(relx = 0.05, rely = 0.05 + y_add_space*i, anchor = "w")        
             
             i += 1
         
-        dist1 = calc1.distribution_table_dataframe()
-        print(dist1.weight)
-        #self.popup_results_window(total_revenue_text)
+        #print(df1)
+
+        
+        df_2020 = pd.read_csv('egypt_results_2020.csv')
+        df_2020['weight'] = 2.2
+        df_2020['Profit_flag'] = np.where(df_2020['Net_tax_base'] < 0, 'Loss', 'Profit')
+        df2020_new = pd.DataFrame()
+        df2020_new['Net_acc_profit'] = df_2020['Net_accounting_profit'].groupby(df_2020['Profit_flag']).sum()
+        df2020_new['Tax_depr'] = df_2020['Tax_depr'].groupby(df_2020['Profit_flag']).sum()
+        df2020_new['Donations'] = df_2020['Donations_allowed'].groupby(df_2020['Profit_flag']).sum()
+
+        ax = df2020_new.plot.bar(subplots=True)
+        #ax.set_title('Profit & Loss making companies')
+        plt.show()
+
+        dist1 = create_distribution_table(df_2020, groupby='weighted_deciles', income_measure='Net_taxable_profit', averages=False, scaling=True)
+        dist1.to_csv('dist_table.csv', index=False, float_format='%.0f')
+        table1 = dist1.plot(kind='bar', use_index=True, y='citax', legend=False, rot=90, figsize=(8,8))
+        table1.set_title('Distribution of CIT liability in Egypt - 2020')
+        plt.show()
+        #print(dist1) 
+        table2 = dist1.plot(kind='bar', use_index=True, y='Net_taxable_profit', legend=False, rot=90, figsize=(8,8))
+        table2.set_title('Distribution of Net Taxable profit in Egypt - 2020')
+        plt.show()
+
+        
+
         df = df/10**6
         df = df.rename(index={0.0:"Hotels", 1.0:"Banks", 2.0:"Oil&Gas", 3.0:"Gen Bus"})
         df['Add_assets2020'] = df['Add_Bld2020'] + df['Add_Intang2020'] + df['Add_Mach2020'] + df['Add_Others2020'] + df['Add_Comp2020']
         cmap = plt.cm.tab10
         colors = cmap(np.arange(len(df)) % cmap.N)
+        
         ax = df['citax2020'].plot(kind='bar', use_index=True, y='citax2020', 
                             legend=False, rot=90,
                             figsize=(8,8), color=colors)
@@ -480,6 +553,10 @@ class Application(Frame):
                             legend=False, rot=90, figsize=(8,8), color=colors)
         ax3.set_xlabel('Sectors')
         ax3.set_title('Used loss (in million EGP) by Sector (2020)', fontweight="bold")
+        plt.show()
+
+        plt.plot(year_list, wt_cit, color='r', marker='x')
+        plt.title('Corporate tax forecast (in billion EGP)')
         plt.show()
 
         
@@ -546,9 +623,27 @@ class Application(Frame):
         calc2 = Calculator(policy=pol2, records=recs, verbose=False)
         # popup window for the Results
         window = tk.Toplevel()
-        window.geometry("600x700+140+140")
-        label = tk.Label(window, text="Results", font=self.fontStyle)
-        label.place(relx = 0.05, rely = 0.14)
+        window.geometry("700x800+140+140")
+        label = tk.Label(window, text="Results", font=self.fontStyle_title)
+        label.place(relx = 0.5, rely = 0.0, anchor="n")
+        
+        style = ttk.Style()
+        style.theme_use("default")
+        style.configure("mystyle.Treeview", rowheight=30, bd=0, font=('Calibri', 14)) # Modify the font of the body
+        style.configure("mystyle.Treeview.Heading", font=('Calibri', 14,'bold')) # Modify the font of the headings
+        
+        tree = ttk.Treeview(window, columns=(1, 2, 3, 4), padding=10, show='headings', height=15, style="mystyle.Treeview")
+        tree.column(1, width=100, anchor=CENTER)
+        tree.heading(1, text="Year")
+        tree.column(2, width=150, anchor=CENTER)
+        tree.heading(2, text="Current(bn EGP)")
+        tree.column(3, width=150, anchor=CENTER)
+        tree.heading(3, text="Reform(bn EGP)")
+        tree.column(4, width=150, anchor=CENTER)
+        tree.heading(4, text="% Change")
+        tree.place(relx = 0.07, rely = 0.1)
+        
+
         self.s = ttk.Style()
         self.s.configure('my.TButton', font=self.fontStyle)         
         button_close = ttk.Button(window, text="Close", style='my.TButton', command=window.destroy)
@@ -561,8 +656,9 @@ class Application(Frame):
         revenue_dict={}
         revenue_amount_dict = {}
         num = 1
-
-        for year in range(2020, 2025):  
+        start_year = 2020
+        end_year = 2030
+        for year in range(start_year, end_year):  
             calc1.advance_to_year(year) 
             
             # NOTE: calc1 now contains a PRIVATE COPY of pol and a PRIVATE COPY of recs,
@@ -571,58 +667,42 @@ class Application(Frame):
     
             calc1.calc_all()
             weighted_citax1 = calc1.weighted_total('citax')
-                    
             citax_collection_billions1 = weighted_citax1/10**9
-            
             citax_collection_str1 = '{0:.2f}'.format(citax_collection_billions1)
-                      
-            print("The CIT Collection in billions for " + str(year) + "is: ", citax_collection_str1)
-            
-            total_revenue_text[year] = "TAX COLLECTION UNDER CURRENT LAW FOR THE YEAR - " + str(year) + " : " + str(citax_collection_str1) + " bn EGP"
             revenue_dict[year]={}
             revenue_amount_dict[year]={}
             revenue_dict[year]['current_law']={}
             revenue_amount_dict[year]['current_law']={}
-            revenue_dict[year]['current_law']['Label'] = Label(window, text=total_revenue_text[year], font=self.fontStyle)
-            revenue_dict[year]['current_law']['Label'].place(relx = 0.05, rely = 0.1+(num-1)*0.05, anchor = "w")
             revenue_amount_dict[year]['current_law']['amount'] = citax_collection_str1
-            num += 1
 
-        for year in range(2020, 2025):  
             calc2.advance_to_year(year) 
             calc2.calc_all()
-            
             weighted_citax2 = calc2.weighted_total('citax')
-            
             citax_collection_billions2 = weighted_citax2/10**9
-            
             citax_collection_str2 = '{0:.2f}'.format(citax_collection_billions2)
-            
-            print("The CIT Collection in billions for " + str(year) + "is : ", citax_collection_str2)
-            
-            reform_revenue_text[year] = "TAX COLLECTION UNDER REFORM FOR THE YEAR - " + str(year)+"           : "+str(citax_collection_str2)+" bn EGP "
-           
-            #df1, df2 = calc1.distribution_tables(calc2, 'weighted_deciles')
-            #print(df1, df2)     
             revenue_dict[year]['reform']={}
             revenue_amount_dict[year]['reform']={}         
-            revenue_dict[year]['reform']['Label'] = Label(window, text=reform_revenue_text[year], font=self.fontStyle)
-            revenue_dict[year]['reform']['Label'].place(relx = 0.05, rely = 0.15+(num-1)*0.05, anchor = "w")            
             revenue_amount_dict[year]['reform']['amount'] = citax_collection_str2
-                    
+            pct_change = (citax_collection_billions2 - citax_collection_billions1)*100/citax_collection_billions1
+            pct_change = '{0:.2f}'.format(pct_change) + " %"
+            tree.insert('', 'end', text="1", values=(str(year), str(citax_collection_str1), str(citax_collection_str2), pct_change))          
             num += 1
-
-        #print(revenue_amount_dict)
-        df_revenue_proj = pd.DataFrame(revenue_amount_dict)
-        df_revenue_proj = df_revenue_proj.T
-        df_revenue_proj['Current Law'] = df_revenue_proj['current_law'].apply(pd.Series)
-        df_revenue_proj['Reform'] = df_revenue_proj['reform'].apply(pd.Series)
-        df_revenue_proj = df_revenue_proj.drop(['current_law', 'reform'], axis=1)
-        df_revenue_proj['Current Law'] = pd.to_numeric(df_revenue_proj['Current Law'])
-        df_revenue_proj['Reform'] = pd.to_numeric(df_revenue_proj['Reform'])
+        
+        print(revenue_amount_dict)
+        df_revenue_proj = pd.DataFrame()
+        for keys in revenue_amount_dict.keys():
+            dict=revenue_amount_dict[keys]
+            df_temp = pd.DataFrame.from_dict(dict, orient='columns')
+            df_revenue_proj = pd.concat([df_revenue_proj, df_temp], ignore_index='True').astype(float)
+        
+        Year = np.arange(start_year, end_year)
+        df_revenue_proj.insert(0, 'Year', Year)
+        df_revenue_proj = df_revenue_proj.rename(columns={'current_law': 'Current Law', 'reform':'Reform'})
+        df_revenue_proj['% Change'] = (df_revenue_proj['Reform'] - df_revenue_proj['Current Law'])/df_revenue_proj['Current Law']
+        
         print("Revenues\n", df_revenue_proj)
-        ax = df_revenue_proj.plot(y=["Current Law", "Reform"], kind="bar", rot=0,
-                            figsize=(8,8))
+        
+        ax = df_revenue_proj.plot.bar(x='Year', y=["Current Law", "Reform"], rot=0, figsize=(8,8))
         ax.set_ylabel('(billion )')
         ax.set_xlabel('')
         ax.set_title('CIT Revenue - Current Law vs. Reforms', fontweight="bold")
@@ -635,8 +715,7 @@ class Application(Frame):
         #self.pic.configure(image=img3)
         #self.pic.image = img3
 
-              
-
+        
     def generate_tax_expenditures(self):
         
         # create Records object containing pit.csv and pit_weights.csv input data
@@ -684,7 +763,7 @@ class Application(Frame):
         num = 1
         
         #for year in range(years[0], years[-1]+1):            
-        for year in range(2020, 2024):  
+        for year in range(2020, 2026):  
             calc1.advance_to_year(year)        
             calc2.advance_to_year(year)
             # NOTE: calc1 now contains a PRIVATE COPY of pol and a PRIVATE COPY of recs,
@@ -901,15 +980,8 @@ class Application(Frame):
         self.block_widget_dict[num][3].insert(END, self.selected_value)
         self.block_widget_dict[num][2].delete(0, END)
         self.block_widget_dict[num][2].insert(END, self.selected_year)
-    '''
-    def update_policy_selection(self):
-        for num in range(1, self.num_reforms):
-            self.block_selected_dict[num]['selected_item']= self.block_widget_dict[num][1].get()        
-            self.block_selected_dict[num]['selected_value']= self.block_widget_dict[num][3].get()
-            self.block_selected_dict[num]['selected_year']= self.block_widget_dict[num][2].get()
-        print(self.block_selected_dict)
-        return self.block_selected_dict
-    '''
+    
+        
     # --- main ---
     
  

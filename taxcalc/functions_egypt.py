@@ -217,16 +217,19 @@ DEBUG_IDX = 0
 
 
 @iterate_jit(nopython=True)
-def cit_liability(cit_rate_oil, cit_rate_other, Sector, Net_tax_base_Egyp_Pounds, citax):
+def cit_liability(cit_rate_oil, cit_rate_hotels, cit_rate_banks, cit_rate_genbus, Sector, Net_tax_base_Egyp_Pounds, citax):
     """
     Compute tax liability given the corporate rate
     """
     # subtract TI_special_rates from TTI to get Aggregate_Income, which is
     # the portion of TTI that is taxed at normal rates
     taxinc = max(Net_tax_base_Egyp_Pounds, 0)
-    if Sector == 2:
+    if Sector == 0:
+        citax = cit_rate_hotels * taxinc
+    elif Sector == 1:
+        citax = cit_rate_banks * taxinc
+    elif Sector == 2:
         citax = cit_rate_oil * taxinc
-    else:
-        citax = cit_rate_other * taxinc
-    
+    elif Sector == 3:
+        citax = cit_rate_genbus * taxinc
     return citax
