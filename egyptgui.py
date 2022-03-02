@@ -447,7 +447,6 @@ class Application(Frame):
         end_year = 2030
         i=0
         for year in range(start_year, end_year):
-            print(df1)
             calc1.advance_to_year(year)    
             calc1.calc_all()
             wt_accounting_profit = round(calc1.weighted_total('Net_accounting_profit')/10**9, 2)
@@ -494,33 +493,31 @@ class Application(Frame):
             
             i += 1
         
-        #print(df1)
-
-        
         df_2020 = pd.read_csv('egypt_results_2020.csv')
         df_2020['weight'] = 2.2
         df_2020['Profit_flag'] = np.where(df_2020['Net_tax_base'] < 0, 'Loss', 'Profit')
-        df2020_new = pd.DataFrame()
-        df2020_new['Net_acc_profit'] = df_2020['Net_accounting_profit'].groupby(df_2020['Profit_flag']).sum()
-        df2020_new['Tax_depr'] = df_2020['Tax_depr'].groupby(df_2020['Profit_flag']).sum()
-        df2020_new['Donations'] = df_2020['Donations_allowed'].groupby(df_2020['Profit_flag']).sum()
 
-        ax = df2020_new.plot.bar(subplots=True)
-        #ax.set_title('Profit & Loss making companies')
+        #print the revenue forecast chart
+        fig, ax = plt.subplots(figsize=(12, 8))
+        plt.plot(year_list, wt_cit, color='r', marker='x')
+        plt.title('Corporate tax forecast (in billion EGP)')
+        for index in range(len(year_list)):
+            ax.text(year_list[index], wt_cit[index], wt_cit[index], size=12)
         plt.show()
-
+        
+        #Print the distribution tables by tax liability  
         dist1 = create_distribution_table(df_2020, groupby='weighted_deciles', income_measure='Net_taxable_profit', averages=False, scaling=True)
         dist1.to_csv('dist_table.csv', index=False, float_format='%.0f')
         table1 = dist1.plot(kind='bar', use_index=True, y='citax', legend=False, rot=90, figsize=(8,8))
         table1.set_title('Distribution of CIT liability in Egypt - 2020')
         plt.show()
-        #print(dist1) 
+        
+        #Print the distribution tables by Net taxable profit  
         table2 = dist1.plot(kind='bar', use_index=True, y='Net_taxable_profit', legend=False, rot=90, figsize=(8,8))
         table2.set_title('Distribution of Net Taxable profit in Egypt - 2020')
         plt.show()
 
-        
-
+        #print plot of tax liability by sector
         df = df/10**6
         df = df.rename(index={0.0:"Hotels", 1.0:"Banks", 2.0:"Oil&Gas", 3.0:"Gen Bus"})
         df['Add_assets2020'] = df['Add_Bld2020'] + df['Add_Intang2020'] + df['Add_Mach2020'] + df['Add_Others2020'] + df['Add_Comp2020']
@@ -536,29 +533,36 @@ class Application(Frame):
         pic_filename1 = 'CIT Collection by Sector (2020).png' 
         plt.savefig(pic_filename1)
         
+        #Print plot of Donations allowed
         ax1 = df['Donations_allowed2020'].plot(kind='bar', use_index=True, y='Donations_allowed2020', 
                             legend=False, rot=90, figsize=(8,8), color=colors)
         ax1.set_xlabel('Sectors')
         ax1.set_title('Donations allowed as deduction (in million EGP) by Sector (2020)', fontweight="bold")
         plt.show()
 
+        #Print plot of additions to assets
         ax2 = df['Add_assets2020'].plot(kind='bar', use_index=True, y='Add_assets2020', 
                             legend=False, rot=90, figsize=(8,8), color=colors)
         ax2.set_xlabel('Sectors')
         ax2.set_title('Additional Investment in assets (in million EGP) by Sector (2020)', fontweight="bold")
         plt.show()
         
-
+        #Print plot of used loss by sector
         ax3 = df['Used_loss_total2020'].plot(kind='bar', use_index=True, y='Used_loss_total2020', 
                             legend=False, rot=90, figsize=(8,8), color=colors)
         ax3.set_xlabel('Sectors')
         ax3.set_title('Used loss (in million EGP) by Sector (2020)', fontweight="bold")
         plt.show()
 
-        plt.plot(year_list, wt_cit, color='r', marker='x')
-        plt.title('Corporate tax forecast (in billion EGP)')
-        plt.show()
+        #Print the Net accounting profit, tax depreciation and donations data by Profit & Loss making
+        df2020_new = pd.DataFrame()
+        df2020_new['Net_acc_profit'] = df_2020['Net_accounting_profit'].groupby(df_2020['Profit_flag']).sum()
+        df2020_new['Tax_depr'] = df_2020['Tax_depr'].groupby(df_2020['Profit_flag']).sum()
+        df2020_new['Donations'] = df_2020['Donations_allowed'].groupby(df_2020['Profit_flag']).sum()
 
+        df2020_new.plot(kind='bar', subplots=True, figsize=(8,8))
+        plt.show()
+        
         
     ''' Read the policy reform parameters and their values from the reform menu fields and returns a dictionary of reform '''
 
