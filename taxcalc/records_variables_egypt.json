@@ -253,6 +253,12 @@
       "desc": "Net tax base after allowing exemptions and investment incentive as per tax law",
       "form": {"2020": "Item 315 - Tax Return Legal Persons"}
     },
+    "Net_tax_base_behavior": {
+      "type": "float",
+      "desc": "Net tax base after adjusting for behavior",
+      "form": {"2020": "NA"}
+    },
+
     "Net_tax_base_Egyp_Pounds": {
       "type": "float",
       "desc": "Net tax base in Egyptian Pounds if tax is in foreign currency based on exchange rate",
@@ -357,6 +363,12 @@
       "type": "float",
       "desc": "Closing WDV of Computers asset class",
       "form": {"2020": "carried forward from Table 411B  - Tax Return Legal Persons"}
+    },
+    "Profit_flag": {
+      "type": "int",
+      "desc": "Whether Net Taxable Profit >= 0 (1) or < 0 (0)",
+      "form": {"2020": "na"}
+
     }
   }
   

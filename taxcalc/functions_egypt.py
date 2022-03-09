@@ -127,6 +127,18 @@ def Net_taxable_profit(Total_taxable_profit, Total_deductions, Net_taxable_profi
     return Net_taxable_profit
 
 @iterate_jit(nopython=True)
+def Profit_flag(Net_taxable_profit):
+    """
+    Compute net taxable profits afer allowing deductions.
+    """
+    if Net_taxable_profit >= 0:
+        Profit_flag = 1
+    else:
+        Profit_flag = 0
+        
+    return Profit_flag
+
+@iterate_jit(nopython=True)
 def Donations_allowed(Donations_NGO, Donations_Others, Donations_NGO_rate, Net_taxable_profit, Donations_Others_rate, Donations_allowed):
     """
     Compute net taxable profits afer allowing deductions.
@@ -203,17 +215,39 @@ def Net_tax_base(Tax_base, cit_rate_oil, Sector, Exemptions, Investment_incentiv
         Net_tax_base = Tax_base - Exemptions - Investment_incentive
     return Net_tax_base
 
+@iterate_jit(nopython=True)
+def Net_tax_base_behavior(cit_rate_oil, cit_rate_hotels, cit_rate_banks, cit_rate_oil_curr_law, 
+                            cit_rate_hotels_curr_law, cit_rate_banks_curr_law, cit_rate_genbus, 
+                            cit_rate_genbus_curr_law, elasticity, Net_tax_base, Net_tax_base_behavior):
+                        
+    """
+    Compute net taxable profits afer allowing deductions.
+    """
+    
+    frac_change_net_of_cit_rate_oil = ((1-cit_rate_oil)-(1-cit_rate_oil_curr_law))/(1-cit_rate_oil_curr_law)
+    frac_change_Net_tax_base_oil = elasticity*(frac_change_net_of_cit_rate_oil)
+    frac_change_net_of_cit_rate_hotels = ((1-cit_rate_hotels)-(1-cit_rate_hotels_curr_law))/(1-cit_rate_hotels_curr_law)
+    frac_change_Net_tax_base_hotels = elasticity*(frac_change_net_of_cit_rate_hotels)
+    frac_change_net_of_cit_rate_banks = ((1-cit_rate_banks)-(1-cit_rate_banks_curr_law))/(1-cit_rate_banks_curr_law)
+    frac_change_Net_tax_base_banks = elasticity*(frac_change_net_of_cit_rate_banks)
+    frac_change_net_of_cit_rate_genbus = ((1-cit_rate_genbus)-(1-cit_rate_genbus_curr_law))/(1-cit_rate_genbus_curr_law)
+    frac_change_Net_tax_base_genbus = elasticity*(frac_change_net_of_cit_rate_genbus)
+    Net_tax_base_behavior = Net_tax_base*(1+frac_change_Net_tax_base_oil+frac_change_Net_tax_base_hotels+
+                            frac_change_Net_tax_base_banks+frac_change_Net_tax_base_genbus)
+    return Net_tax_base_behavior
+
 
 @iterate_jit(nopython=True)
-def Net_tax_base_Egyp_Pounds(Net_tax_base, Exchange_rate, Net_tax_base_Egyp_Pounds):
+def Net_tax_base_Egyp_Pounds(Net_tax_base_behavior, Exchange_rate, Net_tax_base_Egyp_Pounds):
     """
     Compute net tax base afer allowing donations and losses.
     """
-    Net_tax_base_Egyp_Pounds = Net_tax_base * Exchange_rate
+    Net_tax_base_Egyp_Pounds = Net_tax_base_behavior * Exchange_rate
     return Net_tax_base_Egyp_Pounds
 
 DEBUG = False
 DEBUG_IDX = 0
+
 
 
 @iterate_jit(nopython=True)
