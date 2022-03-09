@@ -340,7 +340,7 @@ class Application(Frame):
 
     def delete_policy_widgets(self):
         num = self.num_reforms 
-        print(num)
+        #print(num)
         if num < 2:
             showinfo("Warning", "cannot delete")
             self.num_reforms += 1                   # increase num_reforms by 1 so that it doesnt reduce to zero in the next step when it is reduced by 1
@@ -579,26 +579,26 @@ class Application(Frame):
                 if block_selected_dict[k]['selected_year']==year:
                     policy_dict['_'+block_selected_dict[k]['selected_item']]=[float(block_selected_dict[k]['selected_value'])]
             ref['policy'][int(year)] = policy_dict
-            print(ref)
+            #print(ref)
         years.sort()
         years = [int(x) for x in years]
         return years, ref
     
     def apply_policy_change(self):
         self.block_selected_dict = {}
-        print(self.num_reforms)
+        #print(self.num_reforms)
         for num in range(1, self.num_reforms+1):
             self.block_selected_dict[num]={}
             self.block_selected_dict[num]['selected_item']= self.block_widget_dict[num][1].get()
             self.block_selected_dict[num]['selected_year']= self.block_widget_dict[num][2].get()
             self.block_selected_dict[num]['selected_value']= self.block_widget_dict[num][3].get()
-        print(self.block_selected_dict)
+        #print(self.block_selected_dict)
         
         recs = Records(data=self.data_filename, weights=self.weights_filename)
         
               
-        print("data_filename: ", self.data_filename)
-        print("weights_filename: ", self.weights_filename)
+        #print("data_filename: ", self.data_filename)
+        #print("weights_filename: ", self.weights_filename)
         
         assert isinstance(recs, Records)
         assert recs.current_year == 2020
@@ -618,7 +618,7 @@ class Application(Frame):
         pol2 = Policy(DEFAULTS_FILENAME=self.policy_filename)
         self.reform={}
         years, self.reform=self.read_reform_dict(self.block_selected_dict)
-        print("reform dictionary: ",self.reform) 
+        #print("reform dictionary: ",self.reform) 
         
         ''' CALCULATOR FOR REFORM '''
         #reform = Calculator.read_json_param_objects('app01_reform.json', None)
@@ -692,7 +692,7 @@ class Application(Frame):
             tree.insert('', 'end', text="1", values=(str(year), str(citax_collection_str1), str(citax_collection_str2), pct_change))          
             num += 1
         
-        print(revenue_amount_dict)
+        #print(revenue_amount_dict)
         df_revenue_proj = pd.DataFrame()
         for keys in revenue_amount_dict.keys():
             dict=revenue_amount_dict[keys]
@@ -924,25 +924,19 @@ class Application(Frame):
                
     
     def policy_options(self):
-        self.sub_directory
-        self.policy_filename
         with open(self.sub_directory+'/'+self.policy_filename) as f:
             current_law_policy = json.load(f)
         current_law_policy_sorted = dict(sorted(current_law_policy.items()))    
         policy_options_list = ['None selected']
         for k, s in current_law_policy_sorted.items():
-            #print(k)
-            #print(current_law_policy[k]['description'])
-            #policy_option_list = policy_option_list + [current_law_policy[k]['description']]
-            policy_options_list = policy_options_list + [k[1:]]
+            if (k[-8:] != 'curr_law'):            
+                policy_options_list = policy_options_list + [k[1:]]
         return (current_law_policy, policy_options_list)
     
     '''This function returns the read and calc variables from json file '''
     '''Used to generate dump variable list '''
 
     def read_calc_variables(self):
-        self.sub_directory
-        self.records_vars_filename
         with open(self.sub_directory+'/'+self.records_vars_filename) as f:
             record_vars = json.load(f)
         records_vars_list = []
@@ -960,7 +954,7 @@ class Application(Frame):
         self.updated_year = self.block_widget_dict[1][2].get()
         self.updated_value = self.block_widget_dict[1][3].get()
         self.reform['policy']['_'+selected_item][self.updated_year]=[self.updated_value]
-        print("Reform2: ", self.reform)
+        #print("Reform2: ", self.reform)
     
     '''This function return the value of policy param selected for reform, as per current law policy
         e.g. if cess_rate is selected in the combo box, it will return a json list of 
@@ -969,7 +963,7 @@ class Application(Frame):
         
     def show_policy_selection(self, event):
         active_widget_number = int(str(event.widget)[1:])
-        print("active_widget_number: ", active_widget_number)
+        #print("active_widget_number: ", active_widget_number)
         num = active_widget_number
         ''' Active widget number is '''
 
